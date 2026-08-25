@@ -1520,73 +1520,142 @@
   let assignedEntrance = [];
   let assignedBarSeeds = [];
 
+  // ---------- EXPORT COMPATIBILITY ----------
+  // Jangan mengandalkan MP4 yang dihasilkan langsung oleh MediaRecorder.
+  // Beberapa browser Android menghasilkan fragmented MP4 yang bisa diputar,
+  // tetapi ditolak oleh editor seperti CapCut/VN/Alight Motion.
+  // Karena itu kita SELALU merekam dengan WebM sementara lalu encode ulang
+  // menjadi MP4 H.264 + AAC + yuv420p + faststart.
   function pickMimeType(){
     const candidates = [
-      'video/mp4;codecs=avc1', 'video/mp4',
-      'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'
+      'video/webm;codecs=vp8',
+      'video/webm'
     ];
-    for (const c of candidates) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c)) return c; }
+    for (const c of candidates) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(c)) return c;
+    }
     return '';
   }
 
-  // ---------- KOMPATIBILITAS: remux/transcode ke MP4 standar via ffmpeg.wasm ----------
-  // Browser (terutama Chrome Android) sering merekam video/mp4 lewat MediaRecorder dalam bentuk
-  // "fragmented MP4" (fMP4). File ini valid dan bisa diputar, tapi banyak aplikasi edit video di
-  // HP menolaknya karena struktur metadatanya (moov atom) tidak di tempat yang mereka harapkan.
-  // Fungsi ini memuat ffmpeg.wasm sekali (di-cache di window) lalu meremux/mentranscode hasil
-  // rekaman menjadi MP4 standar (moov di depan / +faststart) yang jauh lebih kompatibel.
   let ffmpegLoadingPromise = null;
-  async function ensureFFmpeg(onLog){
+
+  async function ensureFFmpeg(){
     if (window.__ffmpegInst) return window.__ffmpegInst;
+
     if (!ffmpegLoadingPromise) {
       ffmpegLoadingPromise = (async () => {
-        const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-        const { toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+        const { FFmpeg } = await import(
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js'
+        );
+        const { toBlobURL } = await import(
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.10/dist/esm/index.js'
+        );
+
         const ffmpeg = new FFmpeg();
-        if (onLog) ffmpeg.on('log', ({ message }) => onLog(message));
-        const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
+
+        const baseURL =
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
+
         await ffmpeg.load({
-          coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-          wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+          coreURL: await toBlobURL(
+            `${baseURL}/ffmpeg-core.js`,
+            'text/javascript'
+          ),
+          wasmURL: await toBlobURL(
+            `${baseURL}/ffmpeg-core.wasm`,
+            'application/wasm'
+          )
         });
+
         window.__ffmpegInst = ffmpeg;
         return ffmpeg;
       })();
     }
+
     return ffmpegLoadingPromise;
   }
 
-  async function remuxToCompatibleMp4(blob, srcExt, onProgress){
-    const { fetchFile } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+  async function remuxToCompatibleMp4(blob, onProgress){
+    const { fetchFile } = await import(
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.10/dist/esm/index.js'
+    );
+
     const ffmpeg = await ensureFFmpeg();
-    const inputName = 'input.' + srcExt;
-    const outputName = 'output.mp4';
-    if (onProgress) ffmpeg.on('progress', ({ progress }) => onProgress(Math.max(0, Math.min(1, progress))));
+
+    const inputName = 'render_input.webm';
+    const outputName = 'render_output.mp4';
+
+    // Bersihkan hasil render sebelumnya.
+    try { await ffmpeg.deleteFile(inputName); } catch(e) {}
+    try { await ffmpeg.deleteFile(outputName); } catch(e) {}
+
+    if (onProgress) {
+      const progressHandler = ({ progress }) => {
+        onProgress(Math.max(0, Math.min(1, progress)));
+      };
+      ffmpeg.on('progress', progressHandler);
+    }
+
     await ffmpeg.writeFile(inputName, await fetchFile(blob));
 
-    // Selalu encode ulang ke kombinasi yang paling umum dibaca editor Android.
-    // Jangan gunakan -c copy sebagai jalur utama karena hasil MediaRecorder bisa berupa
-    // fragmented MP4/WebM yang dapat diputar tetapi ditolak oleh editor tertentu.
+    /*
+      Target kompatibilitas:
+      - MP4 container
+      - H.264/AVC (libx264)
+      - yuv420p 8-bit
+      - AAC-LC
+      - constant 30 fps
+      - moov atom di depan (+faststart)
+      - metadata dan timescale normal
+
+      Ini adalah format yang jauh lebih mudah dibaca oleh editor Android.
+    */
     const args = [
+      '-y',
       '-i', inputName,
+
       '-map', '0:v:0',
       '-map', '0:a:0?',
+
       '-c:v', 'libx264',
       '-preset', 'veryfast',
       '-profile:v', 'main',
-      '-level', '4.0',
+      '-level:v', '4.0',
       '-pix_fmt', 'yuv420p',
+
       '-r', '30',
-      '-crf', '19',
+      '-fps_mode', 'cfr',
+      '-crf', '20',
+
       '-c:a', 'aac',
+      '-profile:a', 'aac_low',
       '-b:a', '160k',
       '-ar', '48000',
+      '-ac', '2',
+
       '-movflags', '+faststart',
+      '-video_track_timescale', '90000',
+
+      '-metadata', 'major_brand=isom',
+      '-metadata', 'minor_version=512',
+      '-metadata', 'compatible_brands=isomiso2avc1mp41',
+
       outputName
     ];
-    await ffmpeg.exec(args);
+
+    const exitCode = await ffmpeg.exec(args);
+
+    if (exitCode !== 0) {
+      throw new Error('FFmpeg gagal membuat MP4 standar. Kode: ' + exitCode);
+    }
+
     const data = await ffmpeg.readFile(outputName);
-    return new Blob([data.buffer], { type: 'video/mp4' });
+
+    if (!data || !data.length) {
+      throw new Error('File MP4 hasil FFmpeg kosong.');
+    }
+
+    return new Blob([data], { type: 'video/mp4' });
   }
 
   // ---------- PROJECT: simpan/buka project yang masih bisa diedit di aplikasi ini ----------
@@ -2028,31 +2097,42 @@
     state.images.forEach(item => { if (item.type === 'video' && item.video) { try { item.video.pause(); } catch(err){} } });
     extraAudioEls.forEach(a => { try { a.pause(); } catch(err){} });
 
+    // MediaRecorder hanya dipakai sebagai tahap sementara.
+    // Hasil WebM TIDAK langsung diberikan ke pengguna.
     let blob = new Blob(chunks, { type: actualMime.split(';')[0] });
-    let ext = isMp4 ? 'mp4' : 'webm';
-    let compatNote = isMp4
-      ? 'Video dibuat dalam format MP4.'
-      : 'Browser ini merekam dalam format WebM (MP4 langsung tidak didukung). File WebM tetap bisa diputar di sebagian besar pemutar video, atau dikonversi ke MP4 memakai alat konversi lain.';
+    let ext = 'webm';
 
-    const compatModeOn = true; // Optimasi kompatibilitas MP4 selalu diterapkan otomatis.
-    if (compatModeOn) {
-      try {
-        statusText.textContent = 'Menyiapkan komponen kompatibilitas (sekali saja)...';
-        progressTrack.classList.add('show');
-        progressFill.style.width = '0%';
-        const compatBlob = await remuxToCompatibleMp4(blob, ext, (p) => {
-          const pct = Math.round(p * 100);
-          progressFill.style.width = pct + '%';
-          statusText.textContent = `Menyempurnakan kompatibilitas video... ${pct}%`;
-        });
-        blob = compatBlob;
-        ext = 'mp4';
-        compatNote = 'Video dibuat dalam format MP4 standar (sudah dioptimalkan agar bisa dibuka di aplikasi edit video lain).';
-      } catch (err) {
-        console.error('Gagal mengoptimalkan kompatibilitas, memakai hasil rekaman asli.', err);
-        compatNote += ' (Optimasi kompatibilitas gagal dijalankan, memakai hasil rekaman asli — coba lagi atau matikan opsi kompatibilitas.)';
-      }
+    statusText.textContent = 'Mengubah hasil render menjadi MP4 yang kompatibel...';
+    progressTrack.classList.add('show');
+    progressFill.style.width = '0%';
+
+    try {
+      blob = await remuxToCompatibleMp4(blob, (p) => {
+        const pct = Math.round(p * 100);
+        progressFill.style.width = pct + '%';
+        statusText.textContent = `Membuat MP4 kompatibel... ${pct}%`;
+      });
+
+      ext = 'mp4';
+    } catch (err) {
+      console.error('FFmpeg MP4 conversion failed:', err);
+      progressTrack.classList.remove('show');
+      statusText.textContent =
+        'Gagal membuat MP4 kompatibel. Video asli tidak diberikan agar tidak menghasilkan file yang sulit diedit.';
+
+      btnRender.disabled = false;
+      btnRender.textContent = 'Coba Buat Video Lagi';
+      renderActions.classList.remove('rendering');
+      isRendering = false;
+
+      alert(
+        'Konversi MP4 standar gagal. Pastikan internet aktif saat pertama kali membuat video karena mesin FFmpeg perlu dimuat. Silakan coba lagi.'
+      );
+      return;
     }
+
+    const compatNote =
+      'MP4 standar H.264 + AAC + yuv420p + faststart. Format ini ditujukan agar lebih mudah diimpor dan diedit di editor video Android.';
 
     const url = URL.createObjectURL(blob);
 
