@@ -169,11 +169,18 @@
 
   .download-box{ margin-top:14px; display:none; border-top:1px solid var(--line); padding-top:14px; }
   .download-box.show{display:block;}
-  .download-box a{
-    display:block; text-align:center; background:var(--panel-2); border:1px solid var(--amber-dim);
-    color:var(--amber); text-decoration:none; padding:12px; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+  .download-row{ display:flex; gap:10px; align-items:stretch; }
+  .download-row input[type="text"]{
+    flex:1; min-width:0;
   }
-  .download-box a:hover{background:#332a1a;}
+  .download-row a{
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    text-align:center; background:var(--panel-2); border:1px solid var(--amber-dim);
+    color:var(--amber); text-decoration:none; padding:0 16px; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .download-row a:hover{background:#332a1a;}
+  @media (max-width: 460px){ .download-row{flex-direction:column;} .download-row a{padding:12px;} }
   .note{font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5;}
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
@@ -580,7 +587,10 @@
         <div class="status" id="statusText"></div>
         <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
         <div class="download-box" id="downloadBox">
-          <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh Video</a>
+          <div class="download-row">
+            <input type="text" id="fileNameInput" placeholder="nama-file (kosongkan untuk otomatis)">
+            <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh Video</a>
+          </div>
           <div class="note" id="formatNote"></div>
         </div>
       </div>
@@ -606,7 +616,23 @@
   const progressFill = document.getElementById('progressFill');
   const downloadBox = document.getElementById('downloadBox');
   const downloadLink = document.getElementById('downloadLink');
+  const fileNameInput = document.getElementById('fileNameInput');
   const formatNote = document.getElementById('formatNote');
+  let lastExt = 'mp4';
+
+  function sanitizeFileName(raw){
+    return raw.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-');
+  }
+  function buildFileName(ext){
+    const raw = sanitizeFileName(fileNameInput.value || '');
+    const base = raw.length > 0 ? raw : 'video-gambar';
+    return `${base}.${ext}`;
+  }
+  fileNameInput.addEventListener('input', () => {
+    if (downloadBox.classList.contains('show')) {
+      downloadLink.download = buildFileName(lastExt);
+    }
+  });
 
   // ---------- IMAGE UPLOAD ----------
   btnPickImages.addEventListener('click', () => fileInput.click());
@@ -1423,8 +1449,9 @@
     canvas.style.display = 'none';
 
     const ext = isMp4 ? 'mp4' : 'webm';
+    lastExt = ext;
     downloadLink.href = url;
-    downloadLink.download = `video-gambar.${ext}`;
+    downloadLink.download = buildFileName(ext);
     downloadBox.classList.add('show');
 
     formatNote.textContent = isMp4
