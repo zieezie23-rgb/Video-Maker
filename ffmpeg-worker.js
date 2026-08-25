@@ -4,7 +4,7 @@
 const MIME_TYPE_JAVASCRIPT = "text/javascript";
 const MIME_TYPE_WASM = "application/wasm";
 const CORE_VERSION = "0.12.10";
-const CORE_URL = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/umd/ffmpeg-core.js`;
+const CORE_URL = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/esm/ffmpeg-core.js`;
 
 const FFMessageType = {
   LOAD: "LOAD",
