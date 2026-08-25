@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gambar ke Video</title>
+<title>MP4 Converter</title>
 <style>
   :root{
     --bg: #14120f;
@@ -348,9 +348,9 @@
 <div class="wrap">
 
   <header>
-    <p class="eyebrow">Studio Montase — Alat Lokal di Browser</p>
-    <h1>Gambar ke Video</h1>
-    <p>Susun beberapa gambar jadi satu video dengan animasi kemunculan, gerakan kamera, dan transisi — lengkap dengan latar warna, gradasi, atau gambar sendiri. Semua diproses di perangkatmu, tidak ada yang diunggah ke server.</p>
+    <p class="eyebrow">Studio Video — Alat Lokal di Browser</p>
+    <h1>MP4 Converter</h1>
+    <p>Gabungkan beberapa video dan/atau gambar jadi satu file MP4/WebM — lengkap dengan animasi kemunculan, gerakan kamera, transisi antar klip, serta latar warna, gradasi, atau gambar sendiri. Semua diproses di perangkatmu, tidak ada yang diunggah ke server.</p>
   </header>
 
   <div class="grid">
@@ -727,8 +727,17 @@
       const item = {type:'video', video, img:null, url:null, name:f.name||'video', userScale:1, userOffX:0, userOffY:0};
       state.images.push(item);
       video.addEventListener('loadedmetadata', () => {
-        // Ambil frame pertama sebagai poster/thumbnail lewat canvas offscreen
-        try { video.currentTime = Math.min(0.05, (video.duration||1)/2); } catch(err) {}
+        // Perbaikan bug WebM: duration sering dilaporkan Infinity sampai kita "memaksa" browser
+        // menghitungnya dengan seek ke waktu sangat besar lalu kembali ke awal.
+        if (!isFinite(video.duration)) {
+          video.currentTime = 1e101;
+          video.addEventListener('timeupdate', function onFixDur(){
+            video.removeEventListener('timeupdate', onFixDur);
+            video.currentTime = Math.min(0.05, (isFinite(video.duration) ? video.duration : 1) / 2);
+          }, { once: true });
+        } else {
+          try { video.currentTime = Math.min(0.05, (video.duration||1)/2); } catch(err) {}
+        }
       });
       video.addEventListener('seeked', function onSeeked(){
         const off = document.createElement('canvas');
