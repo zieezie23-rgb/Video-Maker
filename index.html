@@ -114,6 +114,7 @@
   }
 
   .radio-group{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;}
+  #bgRadioGroup{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 16px;}
   .radio-opt{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim); cursor:pointer;}
   .radio-opt input{accent-color:var(--amber);}
   .radio-opt.active{color:var(--text);}
@@ -161,14 +162,31 @@
   .adjust-file-chip .tag{ flex-shrink:0; }
 
   .main-btn{
-    position:fixed; left:0; right:0; bottom:0; width:100%;
+    position:static; width:100%;
     background: linear-gradient(180deg, var(--amber), var(--amber-dim));
     color:#1a1408; border:none; font-weight:bold; font-size:14px;
     letter-spacing:.06em; text-transform:uppercase; padding:16px; margin:0;
-    z-index:9998; box-shadow:0 -6px 16px rgba(0,0,0,.45);
   }
   .main-btn:disabled{ background:var(--line); color:var(--text-dim); cursor:not-allowed; }
   .main-btn:not(:disabled):hover{filter:brightness(1.08);}
+  .render-actions{
+    position:fixed; left:0; right:0; bottom:0; width:100%;
+    display:grid; grid-template-columns:1fr; gap:8px;
+    padding:10px; z-index:9998; background:rgba(20,18,15,.96);
+    box-shadow:0 -6px 16px rgba(0,0,0,.45);
+  }
+  .render-actions.rendering{grid-template-columns:1fr;}
+  .render-actions.ready{grid-template-columns:1fr 1fr 1fr;}
+  .render-actions.ready .main-btn,
+  .render-actions.ready .download-row input[type="text"],
+  .render-actions.ready .download-row a{min-width:0;}
+  .render-actions.ready .download-box,
+  .render-actions.ready .download-row{display:contents;}
+  .render-actions:not(.rendering):not(.ready) .status,
+  .render-actions.ready .status{display:none;}
+  .render-actions.ready .format-note{display:none;}
+  .render-actions.rendering .status{margin:0; text-align:center;}
+  .render-actions.rendering .progress-track{margin-top:0;}
 
   .stage{
     background:#000; border:1px solid var(--line);
@@ -353,7 +371,6 @@
   <header>
     <p class="eyebrow">Studio Video — Alat Lokal di Browser</p>
     <h1>MP4 Converter</h1>
-    <p>Gabungkan beberapa video dan/atau gambar jadi satu file MP4/WebM — lengkap dengan animasi kemunculan, gerakan kamera, transisi antar klip, serta latar warna, gradasi, atau gambar sendiri. Semua diproses di perangkatmu, tidak ada yang diunggah ke server.</p>
   </header>
 
   <div class="grid">
@@ -367,25 +384,22 @@
               <label class="radio-opt active"><input type="radio" name="videomode" value="gabung" checked> Gabung</label>
               <label class="radio-opt"><input type="radio" name="videomode" value="frame"> Satu Frame</label>
             </div>
-            <div class="note" id="modeHint">Gambar/video berikutnya menggantikan yang sebelumnya, dengan efek transisi di antaranya.</div>
           </div>
           <input type="file" id="fileInput" accept="image/*,video/*,application/octet-stream" multiple style="display:none;">
           <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
           <div class="thumbs" id="thumbs"></div>
-          <div class="note">Bisa memilih gambar dan video sekaligus. Urutan gambar/video = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan. Berkas video ditandai ikon 🎬 dan diputar tanpa suara di dalam video hasil (pakai panel Audio untuk menambah suara).</div>
         </div>
 
         <div class="panel" data-num="02 — LATAR">
           <h2>Latar Belakang</h2>
           <div class="radio-group" id="bgRadioGroup">
-            <label class="radio-opt"><input type="radio" name="bgmode" value="none" checked> Tidak Ada (Transparan)</label>
+            <label class="radio-opt"><input type="radio" name="bgmode" value="none" checked> Tidak Ada</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="solid"> Warna Polos</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="gradient"> Gradasi</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="image"> Unggah Gambar</label>
           </div>
 
           <div class="bg-sub show" id="bgNone">
-            <div class="note">Tidak ada latar yang digambar — area kosong akan transparan di pratinjau. Catatan: saat direkam jadi berkas video, sebagian besar format tidak mendukung transparansi, jadi area kosong bisa tampil hitam.</div>
           </div>
 
           <div class="bg-sub" id="bgSolid">
@@ -436,7 +450,6 @@
 
       <div class="panel" data-num="03 — ANIMASI KEMUNCULAN">
         <h2>Animasi Kemunculan</h2>
-        <p class="sub">Pilih satu atau lebih. Kalau lebih dari satu dicentang, animasinya akan digabung (kombinasi) jadi satu gerakan kemunculan. Kotak kecil di kiri adalah contoh gerakannya.</p>
         <div class="anim-list" id="entranceList">
           <label class="anim-row"><input type="checkbox" value="fade">
             <div class="demo demo-fade"><div class="demo-inner"></div></div>
@@ -487,14 +500,13 @@
             <span class="label-txt"><b>Bounce</b></span>
           </label>
         </div>
-        <div class="anim-hint">Contoh di kotak kecil berputar terus supaya kamu bisa lihat pola gerakannya sebelum dipilih.</div>
       </div>
 
       <div class="panel-group">
         <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
           <h2>Gerakan Kamera &amp; Transisi</h2>
           <div class="field">
-            <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
+            <label>Gerakan Kamera</label>
             <select id="animType">
               <option value="none">Diam</option>
               <option value="zoomin">Zoom In</option>
@@ -517,11 +529,11 @@
             </select>
           </div>
           <div class="field">
-            <label>Durasi Tiap Gambar Muncul (detik)</label>
+            <label>Durasi Tiap Gambar (detik)</label>
             <input type="text" inputmode="decimal" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
             <div class="note" style="margin-top:8px; display:flex; align-items:flex-start; gap:6px;">
               <input type="checkbox" id="followVideoDur" style="margin-top:2px; accent-color:var(--amber);">
-              <label for="followVideoDur" style="text-transform:none; letter-spacing:normal; font-size:11.5px; color:var(--text-dim); cursor:pointer;">Untuk berkas video, ikuti durasi asli video tersebut (video tidak dipotong/terpotong). Durasi di atas tetap dipakai untuk gambar diam.</label>
+              <label for="followVideoDur" style="text-transform:none; letter-spacing:normal; font-size:11.5px; color:var(--text-dim); cursor:pointer;">Ikuti durasi video asli</label>
             </div>
           </div>
           <div class="field">
@@ -545,7 +557,6 @@
           </div>
 
           <div class="bg-sub" id="audioOriginalSec">
-            <div class="note">Memakai audio asli dari tiap berkas video yang diunggah (hanya terdengar selama segmen video itu tampil). Gambar diam tetap tanpa suara. Jika tidak ada berkas video, opsi ini tidak menghasilkan suara.</div>
           </div>
 
           <div class="bg-sub" id="audioUploadSec">
@@ -578,7 +589,6 @@
               <button class="btn-upload" id="btnTtsRecord" style="width:auto; flex:1;">⏺ Rekam Suara untuk Video</button>
             </div>
             <div class="note" id="ttsStatus" style="margin-top:8px;">Belum ada suara yang direkam untuk video.</div>
-            <div class="anim-hint">Peramban tidak mengizinkan suara TTS langsung diambil ke dalam video. Klik "Rekam Suara untuk Video" — jendela berbagi layar akan muncul, pilih <b>Tab Ini</b> lalu centang <b>Bagikan audio tab</b>, baru suaranya bisa masuk ke video.</div>
           </div>
         </div>
       </div>
@@ -588,7 +598,6 @@
     <div>
       <div class="panel" data-num="PRATINJAU">
         <h2>Pratinjau</h2>
-        <p class="sub">Pilih gambar/video, lalu atur Ukuran / Posisi — hasilnya langsung terlihat di pratinjau, tanpa perlu render ulang animasi.</p>
 
         <div class="adjust-filelist" id="adjustThumbs"></div>
 
@@ -624,19 +633,21 @@
         </div>
         <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
 
-        <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar/Video Dulu</button>
-
-        <div class="status" id="statusText"></div>
-        <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="download-box" id="downloadBox">
-          <div class="download-row">
-            <input type="text" id="fileNameInput" placeholder="nama-file (kosongkan untuk otomatis)">
-            <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh Video</a>
-          </div>
-          <div class="note" id="formatNote"></div>
-        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="render-actions" id="renderActions">
+  <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar/Video Dulu</button>
+  <div class="status" id="statusText"></div>
+  <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="download-box" id="downloadBox">
+    <div class="download-row">
+      <input type="text" id="fileNameInput" placeholder="nama-file">
+      <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh</a>
+    </div>
+    <div class="note format-note" id="formatNote"></div>
   </div>
 </div>
 
@@ -666,6 +677,7 @@
   const btnPickImages = document.getElementById('btnPickImages');
   const thumbsEl = document.getElementById('thumbs');
   const btnRender = document.getElementById('btnRender');
+  const renderActions = document.getElementById('renderActions');
   const stagePlaceholder = document.getElementById('stagePlaceholder');
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
@@ -858,7 +870,6 @@
 
   // ---------- MODE VIDEO (GABUNG / SATU FRAME) ----------
   const transField = document.getElementById('transField');
-  const modeHint = document.getElementById('modeHint');
   function getVideoMode(){ return document.querySelector('input[name="videomode"]:checked').value; }
   document.querySelectorAll('input[name="videomode"]').forEach(r => {
     r.addEventListener('change', () => {
@@ -866,9 +877,6 @@
       r.closest('.radio-opt').classList.add('active');
       const isFrame = r.value === 'frame';
       transField.style.display = isFrame ? 'none' : '';
-      modeHint.textContent = isFrame
-        ? 'Tiap gambar/video tetap tampil di layar setelah muncul (tidak digantikan yang berikutnya) — atur ukuran & posisi tiap item lewat panel Pratinjau di kanan supaya semuanya terlihat berdampingan. Kamera terus bergerak sampai akhir video.'
-        : 'Gambar/video berikutnya menggantikan yang sebelumnya, dengan efek transisi di antaranya.';
     });
   });
 
@@ -1501,6 +1509,8 @@
 
     btnRender.disabled = true;
     btnRender.textContent = 'Merender...';
+    renderActions.classList.add('rendering');
+    renderActions.classList.remove('ready');
     progressTrack.classList.add('show');
     statusText.textContent = 'Menyiapkan perekaman...';
 
@@ -1764,6 +1774,8 @@
     progressTrack.classList.remove('show');
     btnRender.disabled = false;
     btnRender.textContent = 'Buat Video Lagi';
+    renderActions.classList.remove('rendering');
+    renderActions.classList.add('ready');
     isRendering = false;
   });
 
