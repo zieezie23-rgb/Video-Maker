@@ -1548,13 +1548,13 @@
           'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js'
         );
         const { toBlobURL } = await import(
-          'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.10/dist/esm/index.js'
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js'
         );
 
         const ffmpeg = new FFmpeg();
 
         const baseURL =
-          'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm';
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
 
         await ffmpeg.load({
           coreURL: await toBlobURL(
@@ -1577,7 +1577,7 @@
 
   async function remuxToCompatibleMp4(blob, onProgress){
     const { fetchFile } = await import(
-      'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.10/dist/esm/index.js'
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js'
     );
 
     const ffmpeg = await ensureFFmpeg();
@@ -2125,8 +2125,11 @@
       renderActions.classList.remove('rendering');
       isRendering = false;
 
+      const detail = err && err.message ? '\\n\\nDetail: ' + err.message : '';
       alert(
-        'Konversi MP4 standar gagal. Pastikan internet aktif saat pertama kali membuat video karena mesin FFmpeg perlu dimuat. Silakan coba lagi.'
+        'Konversi MP4 standar gagal. Pastikan internet aktif saat pertama kali membuat video agar mesin FFmpeg dapat dimuat.' +
+        detail +
+        '\\n\\nJika ini terjadi di GitHub Pages, muat ulang halaman lalu coba lagi.'
       );
       return;
     }
