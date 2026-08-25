@@ -1,0 +1,20 @@
+CHANGELOG — MP4 CONVERTER
+=========================
+
+[1.0.0] — 25 Agustus 2026
+- Rilis awal MP4 Converter berbasis browser.
+- Mendukung gabungan gambar dan video.
+- Menambahkan pilihan animasi kemunculan.
+- Menambahkan gerakan kamera dan transisi.
+- Menambahkan pilihan latar belakang.
+- Menambahkan pengaturan audio dan TTS.
+- Menambahkan pengaturan ukuran serta posisi file.
+- Menambahkan watermark "zie's" pada video hasil export.
+- Menambahkan panduan singkat di dalam aplikasi.
+- Menambahkan dukungan WhatsApp dan email.
+- Menambahkan informasi versi aplikasi.
+
+RENCANA PEMBARUAN
+-----------------
+Rencana fitur dapat berubah berdasarkan kebutuhan pengguna dan masukan yang
+diterima melalui WhatsApp atau email.

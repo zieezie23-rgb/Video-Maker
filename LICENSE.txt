@@ -1,0 +1,35 @@
+LISENSI PENGGUNAAN — MP4 CONVERTER
+==================================
+Versi 1.0.0
+Copyright (c) 2026 Zie
+
+LISENSI TERBATAS
+----------------
+Dengan membeli atau menerima file ini, pembeli mendapatkan hak penggunaan
+pribadi dan/atau komersial atas aplikasi ini sesuai paket pembelian yang
+ditawarkan oleh penjual.
+
+PEMBELI BOLEH:
+- Menggunakan aplikasi untuk membuat video.
+- Menggunakan video hasil export untuk proyek pribadi atau komersial.
+- Menyimpan satu salinan cadangan untuk penggunaan sendiri.
+
+PEMBELI TIDAK BOLEH:
+- Menjual, menyewakan, memberikan, atau membagikan ulang file aplikasi.
+- Mengunggah file ke marketplace, repositori publik, atau situs download.
+- Menghapus atau mengubah identitas "Created by: Zie" dan watermark "zie's"
+  dengan tujuan mengklaim aplikasi sebagai karya sendiri.
+- Membuat produk turunan yang menjual ulang source code aplikasi ini.
+
+PEMBATASAN TANGGUNG JAWAB
+-------------------------
+Aplikasi diberikan sebagaimana adanya. Penjual tidak menjamin aplikasi akan
+berjalan pada semua perangkat, browser, format file, atau versi sistem operasi.
+Penjual tidak bertanggung jawab atas kehilangan data atau kerusakan yang
+terjadi akibat penggunaan aplikasi.
+
+KETENTUAN
+---------
+Lisensi ini tidak memindahkan hak cipta source code kepada pembeli. Hak cipta
+dan kepemilikan aplikasi tetap berada pada Zie. Untuk lisensi tim, white-label,
+penghapusan watermark, atau kebutuhan khusus, hubungi penjual terlebih dahulu.
