@@ -522,7 +522,7 @@
           </div>
           <div class="field">
             <label>Durasi Tiap Gambar Muncul (detik)</label>
-            <input type="number" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
+            <input type="text" inputmode="decimal" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
             <div class="note" style="margin-top:8px; display:flex; align-items:flex-start; gap:6px;">
               <input type="checkbox" id="followVideoDur" style="margin-top:2px; accent-color:var(--amber);">
               <label for="followVideoDur" style="text-transform:none; letter-spacing:normal; font-size:11.5px; color:var(--text-dim); cursor:pointer;">Untuk berkas video, ikuti durasi asli video tersebut (video tidak dipotong/terpotong). Durasi di atas tetap dipakai untuk gambar diam.</label>
@@ -1491,6 +1491,15 @@
       return n - 1;
     }
 
+    // Reset seluruh video ke awal & pastikan berhenti, supaya pemutaran ulang (render kedua dst) mulai bersih.
+    const startedVideos = new Set();
+    state.images.forEach(item => {
+      if (item.type === 'video' && item.video) {
+        try { item.video.pause(); } catch(err){}
+        try { item.video.currentTime = 0; } catch(err){}
+      }
+    });
+
     btnRender.disabled = true;
     btnRender.textContent = 'Merender...';
     progressTrack.classList.add('show');
@@ -1516,17 +1525,34 @@
       if (imgObj.video && imgObj.video.videoWidth) return { width: imgObj.video.videoWidth, height: imgObj.video.videoHeight };
       return { width: 1280, height: 720 };
     }
-    // Elemen yang benar-benar digambar ke canvas: video (frame berjalan, disinkronkan ke waktu segmen)
-    // atau gambar diam. Untuk video, posisi pemutaran diseek langsung ke waktu lokal segmen (lt) agar
-    // hasilnya deterministik dan sinkron dengan garis waktu perekaman.
+    // Elemen yang benar-benar digambar ke canvas: video (frame berjalan natural, disinkronkan dengan
+    // laju waktu nyata perekaman) atau gambar diam. Video diputar (play) sekali saat segmennya mulai
+    // aktif dan dibiarkan berjalan sendiri (bukan di-seek manual tiap frame) supaya seluruh isinya
+    // benar-benar terekam, bukan hanya bagian awal.
     function getDrawable(imgObj, lt){
       if (imgObj.type === 'video' && imgObj.video) {
         const v = imgObj.video;
-        const dur = v.duration && isFinite(v.duration) ? v.duration : lt;
-        try { v.currentTime = Math.max(0, Math.min(lt, Math.max(0, dur - 0.02))); } catch(err) {}
+        if (!startedVideos.has(imgObj)) {
+          startedVideos.add(imgObj);
+          try { v.currentTime = 0; } catch(err) {}
+          const p = v.play();
+          if (p && p.catch) p.catch(()=>{});
+        } else if (v.paused && !v.ended) {
+          const p = v.play();
+          if (p && p.catch) p.catch(()=>{});
+        }
         return v;
       }
       return imgObj.img;
+    }
+    // Jeda video yang bukan bagian dari segmen aktif saat ini, supaya tidak terus berjalan di
+    // belakang layar setelah gilirannya lewat (hemat CPU, mencegah drift waktu).
+    function pauseInactiveVideos(activeIndexSet){
+      state.images.forEach((item, i) => {
+        if (item.type === 'video' && item.video && !activeIndexSet.has(i) && !item.video.paused) {
+          try { item.video.pause(); } catch(err){}
+        }
+      });
     }
 
     function drawSegmentFrame(k, lt, alphaMultiplier, slideOffsetPx){
@@ -1618,6 +1644,7 @@
         drawFrameModeImage(k, lt);
       }
       ctx.restore();
+      pauseInactiveVideos(new Set([kMax]));
 
       const pct = Math.min(100, Math.round((elapsed / totalDuration) * 100));
       progressFill.style.width = pct + '%';
@@ -1662,6 +1689,7 @@
       } else {
         drawSegmentFrame(k, lt, 1, 0);
       }
+      pauseInactiveVideos(inTransitionWindow ? new Set([k, k+1]) : new Set([k]));
 
       const pct = Math.min(100, Math.round((elapsed / totalDuration) * 100));
       progressFill.style.width = pct + '%';
@@ -1676,6 +1704,8 @@
     requestAnimationFrame(videoMode === 'frame' ? frameCombinedMode : frame);
 
     await finished;
+
+    state.images.forEach(item => { if (item.type === 'video' && item.video) { try { item.video.pause(); } catch(err){} } });
 
     const blob = new Blob(chunks, { type: actualMime.split(';')[0] });
     const url = URL.createObjectURL(blob);
