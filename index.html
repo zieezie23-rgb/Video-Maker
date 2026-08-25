@@ -52,6 +52,12 @@
   }
   @media (max-width: 940px){ .grid{grid-template-columns:1fr;} }
 
+  .panel-group{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+  .panel-group:first-child{ margin-top:0; }
+  .panel-group .panel{ margin-top:0 !important; }
+  .panel + .panel-group, .panel-group + .panel, .panel-group + .panel-group{ margin-top:18px; }
+  @media (max-width: 420px){ .panel-group{grid-template-columns:1fr;} }
+
   .panel{
     background:var(--panel);
     border:1px solid var(--line);
@@ -170,34 +176,80 @@
   .download-box a:hover{background:#332a1a;}
   .note{font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5;}
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
+  @media (max-width: 480px){ .adjust-controls-row{grid-template-columns:1fr;} }
+  .adjust-size-field, .adjust-pos-field{
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    text-align:center; background:var(--panel-2); border:1px solid var(--line); border-radius:2px;
+    padding:16px 14px; margin-bottom:0;
+  }
+  .adjust-size-field label, .adjust-pos-field label{ text-align:center; margin:0 0 14px; }
+  .adjust-size-field .size-slider-row, .adjust-pos-field .dir-pad{ margin-top:auto; margin-bottom:auto; }
+  .size-slider-row{ display:flex; align-items:center; gap:10px; width:100%; }
+  .size-step-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--amber);
+    font-size:18px; font-weight:bold; width:34px; height:34px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; padding:0; line-height:1;
+  }
+  .size-step-btn:hover{ border-color:var(--amber-dim); background:#332a1a; }
+  .size-step-btn:active{ filter:brightness(0.9); }
+  .adjust-size-field input[type="range"]{
+    width:100%; max-width:none; -webkit-appearance:none; appearance:none;
+    height:12px; background:var(--line); border-radius:6px; outline:none;
+  }
+  .adjust-size-field input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:28px; height:28px; border-radius:50%;
+    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+    border:2px solid #1a1408; cursor:pointer;
+  }
+  .adjust-size-field input[type="range"]::-moz-range-thumb{
+    width:24px; height:24px; border-radius:50%;
+    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+    border:2px solid #1a1408; cursor:pointer;
+  }
+  .dir-pad{
+    display:grid; grid-template-columns:44px 44px 44px; grid-template-rows:38px 38px 38px;
+    gap:6px; justify-content:center;
+  }
+  .dir-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--amber);
+    font-size:16px; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .dir-btn:hover{ border-color:var(--amber-dim); background:#332a1a; }
+  .dir-btn:active{ filter:brightness(0.9); }
+  .dir-btn.dir-center{ color:var(--text-dim); font-size:10px; cursor:default; }
+  .dir-btn.dir-center:hover{ border-color:var(--line); background:var(--panel); }
   .inline-three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; align-items:end;}
   .inline-three .field{margin-bottom:12px;}
   .inline-three .field label{font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .inline-three input[type="range"]{width:100%;}
 
   /* ---- Entrance animation picker ---- */
-  .anim-list{ display:flex; flex-direction:column; gap:0; border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+  .anim-list{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;
+    border:1px solid var(--line); border-radius:2px; overflow:hidden;
+  }
   .anim-row{
     display:grid;
-    grid-template-columns: 26px 52px 1fr;
+    grid-template-columns: 16px 30px 1fr;
     align-items:center;
-    gap:12px;
-    padding:9px 10px;
+    gap:5px;
+    padding:6px 5px;
     background:var(--panel-2);
   }
-  .anim-row:nth-child(odd){ background:#211d16; }
-  .anim-row input[type=checkbox]{ accent-color:var(--amber); width:16px; height:16px; }
-  .anim-row .label-txt{ font-size:12.5px; color:var(--text); }
+  .anim-row:nth-child(6n+4), .anim-row:nth-child(6n+5), .anim-row:nth-child(6n){ background:#211d16; }
+  .anim-row input[type=checkbox]{ accent-color:var(--amber); width:14px; height:14px; }
+  .anim-row .label-txt{ font-size:10.5px; color:var(--text); line-height:1.2; }
   .anim-row .label-txt b{ color:var(--amber); font-weight:normal; }
-  .anim-row .desc{ display:block; font-size:11px; color:var(--text-dim); margin-top:1px; }
 
   .demo{
-    width:46px; height:34px; background:#0b0a08; border:1px solid var(--line);
+    width:28px; height:22px; background:#0b0a08; border:1px solid var(--line);
     border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
   }
   .demo-inner{
     position:absolute; inset:0; margin:auto;
-    width:22px; height:22px;
+    width:12px; height:12px;
     background: linear-gradient(135deg, var(--amber), #6b3f14);
     border-radius:2px;
   }
@@ -217,13 +269,13 @@
   .demo-split{ }
   .demo-split .demo-inner{ display:none; }
   .demo-split::before, .demo-split::after{
-    content:''; position:absolute; top:6px; width:11px; height:22px;
+    content:''; position:absolute; top:5px; width:7px; height:14px;
     background:linear-gradient(135deg, var(--amber), #6b3f14);
   }
-  .demo-split::before{ left:12px; animation: dSplitL 1.6s ease-in-out infinite; }
-  .demo-split::after{ right:12px; animation: dSplitR 1.6s ease-in-out infinite; }
-  @keyframes dSplitL{ 0%{ transform:translateX(-14px);} 55%,100%{ transform:translateX(0);} }
-  @keyframes dSplitR{ 0%{ transform:translateX(14px);} 55%,100%{ transform:translateX(0);} }
+  .demo-split::before{ left:7px; animation: dSplitL 1.6s ease-in-out infinite; }
+  .demo-split::after{ right:7px; animation: dSplitR 1.6s ease-in-out infinite; }
+  @keyframes dSplitL{ 0%{ transform:translateX(-9px);} 55%,100%{ transform:translateX(0);} }
+  @keyframes dSplitR{ 0%{ transform:translateX(9px);} 55%,100%{ transform:translateX(0);} }
   /* Wipe */
   .demo-wipe .demo-inner{ animation: dWipe 1.6s ease-in-out infinite; clip-path: inset(0 100% 0 0); }
   @keyframes dWipe{ 0%{ clip-path: inset(0 100% 0 0);} 60%,100%{ clip-path: inset(0 0 0 0);} }
@@ -241,12 +293,12 @@
   }
   /* Random Bars */
   .demo-randombars .demo-inner{ display:none; }
-  .demo-randombars .bar{ position:absolute; top:6px; width:4px; height:22px; background:linear-gradient(135deg, var(--amber), #6b3f14); }
-  .demo-randombars .bar:nth-child(1){ left:9px; animation: dBar 1.6s steps(1) infinite; animation-delay:0s; }
-  .demo-randombars .bar:nth-child(2){ left:15px; animation: dBar 1.6s steps(1) infinite; animation-delay:.25s; }
-  .demo-randombars .bar:nth-child(3){ left:21px; animation: dBar 1.6s steps(1) infinite; animation-delay:.05s; }
-  .demo-randombars .bar:nth-child(4){ left:27px; animation: dBar 1.6s steps(1) infinite; animation-delay:.35s; }
-  .demo-randombars .bar:nth-child(5){ left:33px; animation: dBar 1.6s steps(1) infinite; animation-delay:.15s; }
+  .demo-randombars .bar{ position:absolute; top:4px; width:3px; height:14px; background:linear-gradient(135deg, var(--amber), #6b3f14); }
+  .demo-randombars .bar:nth-child(1){ left:5px; animation: dBar 1.6s steps(1) infinite; animation-delay:0s; }
+  .demo-randombars .bar:nth-child(2){ left:10px; animation: dBar 1.6s steps(1) infinite; animation-delay:.25s; }
+  .demo-randombars .bar:nth-child(3){ left:15px; animation: dBar 1.6s steps(1) infinite; animation-delay:.05s; }
+  .demo-randombars .bar:nth-child(4){ left:20px; animation: dBar 1.6s steps(1) infinite; animation-delay:.35s; }
+  .demo-randombars .bar:nth-child(5){ left:24px; animation: dBar 1.6s steps(1) infinite; animation-delay:.15s; }
   @keyframes dBar{ 0%{opacity:0;} 30%,100%{opacity:1;} 100%{opacity:1;} }
   /* Grow & Turn */
   .demo-growturn .demo-inner{ animation: dGrowTurn 1.8s cubic-bezier(.2,.9,.3,1.2) infinite; }
@@ -279,153 +331,151 @@
   <div class="grid">
     <!-- LEFT: CONTROLS -->
     <div>
-      <div class="panel" data-num="01 — GAMBAR">
-        <h2>Unggah Gambar</h2>
-        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
-        <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
-        <div class="thumbs" id="thumbs"></div>
-        <div class="note">Urutan gambar = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan.</div>
-      </div>
-
-      <div class="panel" data-num="02 — LATAR">
-        <h2>Latar Belakang</h2>
-        <div class="radio-group" id="bgRadioGroup">
-          <label class="radio-opt active"><input type="radio" name="bgmode" value="solid" checked> Warna Polos</label>
-          <label class="radio-opt"><input type="radio" name="bgmode" value="gradient"> Gradasi</label>
-          <label class="radio-opt"><input type="radio" name="bgmode" value="image"> Unggah Gambar</label>
+      <div class="panel-group">
+        <div class="panel" data-num="01 — GAMBAR">
+          <h2>Unggah Gambar</h2>
+          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+          <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="note">Urutan gambar = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan.</div>
         </div>
 
-        <div class="bg-sub show" id="bgSolid">
-          <div class="field" style="max-width:120px;">
-            <label>Warna</label>
-            <input type="color" id="solidColor" value="#14120f">
+        <div class="panel" data-num="02 — LATAR">
+          <h2>Latar Belakang</h2>
+          <div class="radio-group" id="bgRadioGroup">
+            <label class="radio-opt active"><input type="radio" name="bgmode" value="solid" checked> Warna Polos</label>
+            <label class="radio-opt"><input type="radio" name="bgmode" value="gradient"> Gradasi</label>
+            <label class="radio-opt"><input type="radio" name="bgmode" value="image"> Unggah Gambar</label>
           </div>
-        </div>
 
-        <div class="bg-sub" id="bgGradient">
-          <div class="inline-two">
-            <div class="field">
-              <label>Warna 1</label>
-              <input type="color" id="gradColor1" value="#e8a33d">
-            </div>
-            <div class="field">
-              <label>Warna 2</label>
-              <input type="color" id="gradColor2" value="#14120f">
+          <div class="bg-sub show" id="bgSolid">
+            <div class="field" style="max-width:120px;">
+              <label>Warna</label>
+              <input type="color" id="solidColor" value="#14120f">
             </div>
           </div>
-          <div class="field">
-            <label>Arah Gradasi</label>
-            <select id="gradDir">
-              <option value="vertical">Atas ke Bawah</option>
-              <option value="horizontal">Kiri ke Kanan</option>
-              <option value="diagonal1">Diagonal ↘</option>
-              <option value="diagonal2">Diagonal ↙</option>
-              <option value="radial">Radial (Tengah ke Luar)</option>
+
+          <div class="bg-sub" id="bgGradient">
+            <div class="inline-two">
+              <div class="field">
+                <label>Warna 1</label>
+                <input type="color" id="gradColor1" value="#e8a33d">
+              </div>
+              <div class="field">
+                <label>Warna 2</label>
+                <input type="color" id="gradColor2" value="#14120f">
+              </div>
+            </div>
+            <div class="field">
+              <label>Arah Gradasi</label>
+              <select id="gradDir">
+                <option value="vertical">Atas ke Bawah</option>
+                <option value="horizontal">Kiri ke Kanan</option>
+                <option value="diagonal1">Diagonal ↘</option>
+                <option value="diagonal2">Diagonal ↙</option>
+                <option value="radial">Radial (Tengah ke Luar)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-sub" id="bgImage">
+            <input type="file" id="bgImageInput" accept="image/*" style="display:none;">
+            <button class="btn-upload" id="btnPickBg">+ Pilih Gambar Latar</button>
+            <div class="thumbs" id="bgThumb"></div>
+          </div>
+
+          <div class="field" style="margin-top:14px;">
+            <label>Mode Tampilan Gambar Utama</label>
+            <select id="fitMode">
+              <option value="contain">Pas / Contain (latar terlihat di sisi)</option>
+              <option value="cover">Penuh / Cover (gambar dipotong mengisi layar)</option>
             </select>
           </div>
-        </div>
-
-        <div class="bg-sub" id="bgImage">
-          <input type="file" id="bgImageInput" accept="image/*" style="display:none;">
-          <button class="btn-upload" id="btnPickBg">+ Pilih Gambar Latar</button>
-          <div class="thumbs" id="bgThumb"></div>
-        </div>
-
-        <div class="field" style="margin-top:14px;">
-          <label>Mode Tampilan Gambar Utama</label>
-          <select id="fitMode">
-            <option value="contain">Pas / Contain (latar terlihat di sisi)</option>
-            <option value="cover">Penuh / Cover (gambar dipotong mengisi layar)</option>
-          </select>
         </div>
       </div>
 
       <div class="panel" data-num="03 — ANIMASI KEMUNCULAN">
         <h2>Animasi Kemunculan</h2>
-        <p class="sub">Pilih satu atau lebih. Kalau lebih dari satu dicentang, tiap gambar akan diberi animasi acak dari pilihan yang dicentang. Kotak kecil di kiri adalah contoh gerakannya.</p>
+        <p class="sub">Pilih satu atau lebih. Kalau lebih dari satu dicentang, animasinya akan digabung (kombinasi) jadi satu gerakan kemunculan. Kotak kecil di kiri adalah contoh gerakannya.</p>
         <div class="anim-list" id="entranceList">
-          <label class="anim-row"><input type="checkbox" value="appear" checked>
-            <div class="demo demo-appear"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Appear</b><span class="desc">Objek langsung muncul secara instan.</span></span>
-          </label>
-          <label class="anim-row"><input type="checkbox" value="fade">
+          <label class="anim-row"><input type="checkbox" value="fade" checked>
             <div class="demo demo-fade"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Fade</b><span class="desc">Objek muncul perlahan dari transparan menjadi jelas.</span></span>
+            <span class="label-txt"><b>Fade</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="flyin">
             <div class="demo demo-flyin"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Fly In</b><span class="desc">Objek terbang masuk dari arah tertentu.</span></span>
+            <span class="label-txt"><b>Fly In</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="floatin">
             <div class="demo demo-floatin"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Float In</b><span class="desc">Objek melayang masuk dengan lembut.</span></span>
+            <span class="label-txt"><b>Float In</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="split">
             <div class="demo demo-split"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Split</b><span class="desc">Objek muncul membelah dari tengah/samping.</span></span>
+            <span class="label-txt"><b>Split</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="wipe">
             <div class="demo demo-wipe"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Wipe</b><span class="desc">Objek muncul menyapu dari satu arah.</span></span>
+            <span class="label-txt"><b>Wipe</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="shape">
             <div class="demo demo-shape"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Shape</b><span class="desc">Objek muncul mengikuti pola bentuk geometri.</span></span>
+            <span class="label-txt"><b>Shape</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="wheel">
             <div class="demo demo-wheel"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Wheel</b><span class="desc">Objek muncul berputar seperti jeruji roda.</span></span>
+            <span class="label-txt"><b>Wheel</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="randombars">
             <div class="demo demo-randombars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-            <span class="label-txt"><b>Random Bars</b><span class="desc">Objek muncul melalui garis-garis acak.</span></span>
+            <span class="label-txt"><b>Random Bars</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="growturn">
             <div class="demo demo-growturn"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Grow &amp; Turn</b><span class="desc">Objek muncul sambil membesar dan berputar.</span></span>
+            <span class="label-txt"><b>Grow &amp; Turn</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="zoom">
             <div class="demo demo-zoom"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Zoom</b><span class="desc">Objek muncul dari kecil lalu membesar ke depan.</span></span>
+            <span class="label-txt"><b>Zoom</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="swivel">
             <div class="demo demo-swivel"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Swivel</b><span class="desc">Objek muncul sambil berputar pada porosnya.</span></span>
+            <span class="label-txt"><b>Swivel</b></span>
           </label>
           <label class="anim-row"><input type="checkbox" value="bounce">
             <div class="demo demo-bounce"><div class="demo-inner"></div></div>
-            <span class="label-txt"><b>Bounce</b><span class="desc">Objek muncul dengan efek memantul.</span></span>
+            <span class="label-txt"><b>Bounce</b></span>
           </label>
         </div>
         <div class="anim-hint">Contoh di kotak kecil berputar terus supaya kamu bisa lihat pola gerakannya sebelum dipilih.</div>
       </div>
 
-      <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
-        <h2>Gerakan Kamera &amp; Transisi</h2>
-        <div class="field">
-          <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
-          <select id="animType">
-            <option value="none">Diam</option>
-            <option value="zoomin">Zoom In</option>
-            <option value="zoomout">Zoom Out</option>
-            <option value="panleft">Gerak ke Kiri</option>
-            <option value="panright">Gerak ke Kanan</option>
-            <option value="panup">Gerak ke Atas</option>
-            <option value="pandown">Gerak ke Bawah</option>
-            <option value="rotate">Putar Halus</option>
-            <option value="random">Acak (Beda Tiap Gambar)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Efek Transisi Antar Gambar</label>
-          <select id="transType">
-            <option value="none">Potong Langsung</option>
-            <option value="fade" selected>Fade (Menyatu)</option>
-            <option value="slide">Geser (Slide)</option>
-            <option value="wipe">Wipe (Sapuan)</option>
-          </select>
-        </div>
-        <div class="inline-two">
+      <div class="panel-group">
+        <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
+          <h2>Gerakan Kamera &amp; Transisi</h2>
+          <div class="field">
+            <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
+            <select id="animType">
+              <option value="none">Diam</option>
+              <option value="zoomin">Zoom In</option>
+              <option value="zoomout">Zoom Out</option>
+              <option value="panleft">Gerak ke Kiri</option>
+              <option value="panright">Gerak ke Kanan</option>
+              <option value="panup">Gerak ke Atas</option>
+              <option value="pandown">Gerak ke Bawah</option>
+              <option value="rotate">Putar Halus</option>
+              <option value="random">Acak (Beda Tiap Gambar)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Efek Transisi Antar Gambar</label>
+            <select id="transType">
+              <option value="none">Potong Langsung</option>
+              <option value="fade" selected>Fade (Menyatu)</option>
+              <option value="slide">Geser (Slide)</option>
+              <option value="wipe">Wipe (Sapuan)</option>
+            </select>
+          </div>
           <div class="field">
             <label>Durasi per Gambar (detik)</label>
             <input type="number" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
@@ -440,47 +490,47 @@
             </select>
           </div>
         </div>
-      </div>
 
-      <div class="panel" data-num="05 — AUDIO">
-        <h2>Audio</h2>
-        <div class="radio-group" id="audioRadioGroup">
-          <label class="radio-opt active"><input type="radio" name="audiomode" value="none" checked> Tanpa Audio</label>
-          <label class="radio-opt"><input type="radio" name="audiomode" value="upload"> Unggah Audio</label>
-          <label class="radio-opt"><input type="radio" name="audiomode" value="tts"> Teks ke Suara (TTS)</label>
-        </div>
-
-        <div class="bg-sub" id="audioUploadSec">
-          <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
-          <button class="btn-upload" id="btnPickAudio">+ Pilih File Audio</button>
-          <div class="note" id="audioFileName">Belum ada file audio dipilih.</div>
-        </div>
-
-        <div class="bg-sub" id="audioTtsSec">
-          <div class="field">
-            <label>Teks yang Diucapkan</label>
-            <textarea id="ttsText" rows="3" placeholder="Tulis teks yang ingin diubah jadi suara..." style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:13px; padding:8px 10px; border-radius:2px; resize:vertical;"></textarea>
+        <div class="panel" data-num="05 — AUDIO">
+          <h2>Audio</h2>
+          <div class="radio-group" id="audioRadioGroup">
+            <label class="radio-opt active"><input type="radio" name="audiomode" value="none" checked> Tanpa Audio</label>
+            <label class="radio-opt"><input type="radio" name="audiomode" value="upload"> Unggah Audio</label>
+            <label class="radio-opt"><input type="radio" name="audiomode" value="tts"> Teks ke Suara (TTS)</label>
           </div>
-          <div class="field">
-            <label>Jenis Suara</label>
-            <select id="ttsVoice"></select>
+
+          <div class="bg-sub" id="audioUploadSec">
+            <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
+            <button class="btn-upload" id="btnPickAudio">+ Pilih File Audio</button>
+            <div class="note" id="audioFileName">Belum ada file audio dipilih.</div>
           </div>
-          <div class="inline-two">
+
+          <div class="bg-sub" id="audioTtsSec">
             <div class="field">
-              <label>Pitch (<span id="ttsPitchVal">1.0</span>)</label>
-              <input type="range" id="ttsPitch" min="0" max="2" value="1" step="0.1">
+              <label>Teks yang Diucapkan</label>
+              <textarea id="ttsText" rows="3" placeholder="Tulis teks yang ingin diubah jadi suara..." style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:13px; padding:8px 10px; border-radius:2px; resize:vertical;"></textarea>
             </div>
             <div class="field">
-              <label>Kecepatan / Rate (<span id="ttsRateVal">1.0</span>)</label>
-              <input type="range" id="ttsRate" min="0.5" max="2" value="1" step="0.1">
+              <label>Jenis Suara</label>
+              <select id="ttsVoice"></select>
             </div>
+            <div class="inline-two">
+              <div class="field">
+                <label>Pitch (<span id="ttsPitchVal">50</span>)</label>
+                <input type="range" id="ttsPitch" min="0" max="100" value="50" step="1">
+              </div>
+              <div class="field">
+                <label>Kecepatan / Rate (<span id="ttsRateVal">1.0</span>)</label>
+                <input type="range" id="ttsRate" min="1" max="3" value="1" step="0.1">
+              </div>
+            </div>
+            <div class="row" style="gap:8px;">
+              <button class="btn-upload" id="btnTtsPreview" style="width:auto; flex:1;">▶ Dengarkan</button>
+              <button class="btn-upload" id="btnTtsRecord" style="width:auto; flex:1;">⏺ Rekam Suara untuk Video</button>
+            </div>
+            <div class="note" id="ttsStatus" style="margin-top:8px;">Belum ada suara yang direkam untuk video.</div>
+            <div class="anim-hint">Peramban tidak mengizinkan suara TTS langsung diambil ke dalam video. Klik "Rekam Suara untuk Video" — jendela berbagi layar akan muncul, pilih <b>Tab Ini</b> lalu centang <b>Bagikan audio tab</b>, baru suaranya bisa masuk ke video.</div>
           </div>
-          <div class="row" style="gap:8px;">
-            <button class="btn-upload" id="btnTtsPreview" style="width:auto; flex:1;">▶ Dengarkan</button>
-            <button class="btn-upload" id="btnTtsRecord" style="width:auto; flex:1;">⏺ Rekam Suara untuk Video</button>
-          </div>
-          <div class="note" id="ttsStatus" style="margin-top:8px;">Belum ada suara yang direkam untuk video.</div>
-          <div class="anim-hint">Peramban tidak mengizinkan suara TTS langsung diambil ke dalam video. Klik "Rekam Suara untuk Video" — jendela berbagi layar akan muncul, pilih <b>Tab Ini</b> lalu centang <b>Bagikan audio tab</b>, baru suaranya bisa masuk ke video.</div>
         </div>
       </div>
 
@@ -491,31 +541,42 @@
     <div>
       <div class="panel" data-num="PRATINJAU">
         <h2>Pratinjau</h2>
-        <p class="sub">Pilih gambar, lalu geser Ukuran / Posisi X / Posisi Y — hasilnya langsung terlihat di pratinjau di bawah, tanpa perlu render ulang animasi.</p>
+        <p class="sub">Pilih gambar, lalu atur Ukuran / Posisi — hasilnya langsung terlihat di pratinjau, tanpa perlu render ulang animasi.</p>
 
         <div class="adjust-row-thumbs" id="adjustThumbs"></div>
-
-        <div class="inline-three">
-          <div class="field">
-            <label>Ukuran (<span id="scaleVal">100</span>%)</label>
-            <input type="range" id="scaleSlider" min="40" max="220" value="100" step="2">
-          </div>
-          <div class="field">
-            <label>Posisi X (<span id="posXVal">0</span>)</label>
-            <input type="range" id="posXSlider" min="-50" max="50" value="0" step="1">
-          </div>
-          <div class="field">
-            <label>Posisi Y (<span id="posYVal">0</span>)</label>
-            <input type="range" id="posYSlider" min="-50" max="50" value="0" step="1">
-          </div>
-        </div>
-        <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
 
         <div class="stage" id="stage">
           <div class="stage-placeholder" id="stagePlaceholder">Belum ada gambar. Unggah gambar di panel kiri untuk mulai.</div>
           <canvas id="canvas" style="display:none;"></canvas>
           <video id="resultVideo" controls style="display:none;"></video>
         </div>
+
+        <div class="adjust-controls-row">
+          <div class="field adjust-size-field">
+            <label>Ukuran (<span id="scaleVal">100</span>%)</label>
+            <div class="size-slider-row">
+              <button type="button" class="size-step-btn" id="scaleMinusBtn" title="Kurangi 5%">−</button>
+              <input type="range" id="scaleSlider" min="40" max="220" value="100" step="5">
+              <button type="button" class="size-step-btn" id="scalePlusBtn" title="Tambah 5%">+</button>
+            </div>
+          </div>
+          <div class="field adjust-pos-field">
+            <label>Posisi (X <span id="posXVal">0</span> / Y <span id="posYVal">0</span>)</label>
+            <div class="dir-pad">
+              <span></span>
+              <button type="button" class="dir-btn" id="posUpBtn" title="Geser ke atas">▲</button>
+              <span></span>
+              <button type="button" class="dir-btn" id="posLeftBtn" title="Geser ke kiri">◀</button>
+              <button type="button" class="dir-btn dir-center" id="posCenterBtn" title="Tengahkan posisi">●</button>
+              <button type="button" class="dir-btn" id="posRightBtn" title="Geser ke kanan">▶</button>
+              <span></span>
+              <button type="button" class="dir-btn" id="posDownBtn" title="Geser ke bawah">▼</button>
+              <span></span>
+            </div>
+          </div>
+        </div>
+        <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
+
         <div class="status" id="statusText"></div>
         <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
         <div class="download-box" id="downloadBox">
@@ -710,14 +771,14 @@
     speechSynthesis.onvoiceschanged = loadVoices;
   }
 
-  ttsPitch.addEventListener('input', () => ttsPitchVal.textContent = parseFloat(ttsPitch.value).toFixed(1));
+  ttsPitch.addEventListener('input', () => ttsPitchVal.textContent = ttsPitch.value);
   ttsRate.addEventListener('input', () => ttsRateVal.textContent = parseFloat(ttsRate.value).toFixed(1));
 
   function buildUtterance(){
     const u = new SpeechSynthesisUtterance(ttsText.value || '');
     const v = voicesList[parseInt(ttsVoiceSelect.value, 10)];
     if (v) u.voice = v;
-    u.pitch = parseFloat(ttsPitch.value);
+    u.pitch = parseFloat(ttsPitch.value) / 50; // slider 0-100 -> nilai pitch API 0-2
     u.rate = parseFloat(ttsRate.value);
     return u;
   }
@@ -776,12 +837,16 @@
   let selectedImageIndex = 0;
   const adjustThumbsEl = document.getElementById('adjustThumbs');
   const scaleSlider = document.getElementById('scaleSlider');
-  const posXSlider = document.getElementById('posXSlider');
-  const posYSlider = document.getElementById('posYSlider');
+  const posUpBtn = document.getElementById('posUpBtn');
+  const posDownBtn = document.getElementById('posDownBtn');
+  const posLeftBtn = document.getElementById('posLeftBtn');
+  const posRightBtn = document.getElementById('posRightBtn');
+  const posCenterBtn = document.getElementById('posCenterBtn');
   const scaleVal = document.getElementById('scaleVal');
   const posXVal = document.getElementById('posXVal');
   const posYVal = document.getElementById('posYVal');
   const btnResetAdjust = document.getElementById('btnResetAdjust');
+  const POS_STEP = 2; // langkah geser per klik tombol (dalam persen -50..50)
 
   function renderAdjustThumbs(){
     adjustThumbsEl.innerHTML = '';
@@ -809,8 +874,8 @@
     const x = Math.round((item.userOffX||0) * 100);
     const y = Math.round((item.userOffY||0) * 100);
     scaleSlider.value = s; scaleVal.textContent = s;
-    posXSlider.value = x; posXVal.textContent = x;
-    posYSlider.value = y; posYVal.textContent = y;
+    posXVal.textContent = x;
+    posYVal.textContent = y;
   }
 
   function updateAdjustPreview(){
@@ -851,14 +916,36 @@
     if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userScale = parseInt(scaleSlider.value,10)/100;
     updateAdjustPreview();
   });
-  posXSlider.addEventListener('input', () => {
-    posXVal.textContent = posXSlider.value;
-    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userOffX = parseInt(posXSlider.value,10)/100;
+  function nudgeScale(step){
+    const min = parseInt(scaleSlider.min,10), max = parseInt(scaleSlider.max,10);
+    const val = Math.max(min, Math.min(max, parseInt(scaleSlider.value,10) + step));
+    scaleSlider.value = val;
+    scaleVal.textContent = val;
+    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userScale = val/100;
     updateAdjustPreview();
-  });
-  posYSlider.addEventListener('input', () => {
-    posYVal.textContent = posYSlider.value;
-    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userOffY = parseInt(posYSlider.value,10)/100;
+  }
+  document.getElementById('scaleMinusBtn').addEventListener('click', () => nudgeScale(-5));
+  document.getElementById('scalePlusBtn').addEventListener('click', () => nudgeScale(5));
+  function nudgePosition(dxStep, dyStep){
+    const item = state.images[selectedImageIndex];
+    if (!item) return;
+    const x = Math.max(-50, Math.min(50, Math.round((item.userOffX||0)*100) + dxStep));
+    const y = Math.max(-50, Math.min(50, Math.round((item.userOffY||0)*100) + dyStep));
+    item.userOffX = x/100;
+    item.userOffY = y/100;
+    posXVal.textContent = x;
+    posYVal.textContent = y;
+    updateAdjustPreview();
+  }
+  posUpBtn.addEventListener('click', () => nudgePosition(0, -POS_STEP));
+  posDownBtn.addEventListener('click', () => nudgePosition(0, POS_STEP));
+  posLeftBtn.addEventListener('click', () => nudgePosition(-POS_STEP, 0));
+  posRightBtn.addEventListener('click', () => nudgePosition(POS_STEP, 0));
+  posCenterBtn.addEventListener('click', () => {
+    const item = state.images[selectedImageIndex];
+    if (!item) return;
+    item.userOffX = 0; item.userOffY = 0;
+    posXVal.textContent = 0; posYVal.textContent = 0;
     updateAdjustPreview();
   });
   btnResetAdjust.addEventListener('click', () => {
@@ -1065,6 +1152,124 @@
     ctx.restore();
   }
 
+  // ---------- ENTRANCE ANIMATIONS (KOMBINASI) ----------
+  // Ketika lebih dari satu jenis dicentang, semua digabung jadi satu gerakan:
+  // alpha & skala dikalikan, pergeseran & rotasi dijumlahkan, dan area
+  // "reveal" (wipe/shape/wheel/randombars/split) saling beririsan (intersect).
+  function getEntranceMods(type, ep, drawW, drawH, W, H){
+    const mods = { alpha:1, dx:0, dy:0, sx:1, sy:1, rotAdd:0, clip:null };
+    switch(type){
+      case 'appear':
+        break;
+      case 'fade':
+        mods.alpha = ep;
+        break;
+      case 'flyin': {
+        const e = easeOutCubic(ep);
+        mods.dx = -(1-e) * (drawW*0.7 + 120);
+        mods.alpha = Math.min(1, ep*1.6);
+        break;
+      }
+      case 'floatin': {
+        const e = easeOutCubic(ep);
+        mods.dy = (1-e) * H * 0.3;
+        mods.alpha = Math.min(1, ep*1.4);
+        break;
+      }
+      case 'split': {
+        const e = easeInOutQuad(ep);
+        mods.clip = (cx, cy) => {
+          ctx.rect(cx - (drawW*e)/2, cy - (drawH*e)/2, drawW*e, drawH*e);
+        };
+        break;
+      }
+      case 'wipe': {
+        mods.clip = (cx, cy) => { ctx.rect(cx - drawW/2, cy - drawH/2, drawW*ep, drawH); };
+        break;
+      }
+      case 'shape': {
+        const e = easeInOutQuad(ep);
+        const maxR = Math.hypot(drawW, drawH)/2;
+        mods.clip = (cx, cy) => { ctx.arc(cx, cy, maxR*e, 0, Math.PI*2); };
+        break;
+      }
+      case 'wheel': {
+        const maxR = Math.hypot(drawW, drawH);
+        const ang = Math.PI*2*ep;
+        mods.clip = (cx, cy) => {
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, maxR, -Math.PI/2, -Math.PI/2 + ang);
+        };
+        break;
+      }
+      case 'randombars': {
+        mods.clip = (cx, cy, barSeeds) => {
+          const bars = (barSeeds||[]).length || 10;
+          const barW = drawW / bars;
+          for (let i=0;i<bars;i++){
+            const thresh = (barSeeds && barSeeds[i]!=null) ? barSeeds[i] : 0;
+            const bp = Math.max(0, Math.min(1, (ep - thresh) / 0.55));
+            if (bp <= 0) continue;
+            const bh = drawH * bp;
+            ctx.rect(cx - drawW/2 + i*barW, cy - bh/2, barW+0.5, bh);
+          }
+        };
+        break;
+      }
+      case 'growturn': {
+        const e = easeOutBack(ep);
+        mods.sx = mods.sy = e;
+        mods.rotAdd = (1-ep)*0.9;
+        mods.alpha = Math.min(1, ep*1.6);
+        break;
+      }
+      case 'zoom': {
+        const e = easeOutCubic(ep);
+        mods.sx = mods.sy = Math.max(0.05, e);
+        mods.alpha = Math.min(1, ep*1.8);
+        break;
+      }
+      case 'swivel': {
+        const e = easeOutCubic(ep);
+        mods.sx = Math.max(0.02, e);
+        mods.sy = 1;
+        break;
+      }
+      case 'bounce': {
+        const e = easeOutBounce(ep);
+        mods.dy = -(1-e) * H * 0.5;
+        mods.alpha = Math.min(1, ep*3);
+        break;
+      }
+    }
+    return mods;
+  }
+
+  function drawEntranceImageCombined(img, types, ep, cx, cy, drawW, drawH, rot, barSeeds, outerAlpha, W, H){
+    ep = Math.max(0, Math.min(1, ep));
+    let alpha = 1, dx = 0, dy = 0, sx = 1, sy = 1, rotAdd = 0;
+    const clips = [];
+    types.forEach(type => {
+      const m = getEntranceMods(type, ep, drawW, drawH, W, H);
+      alpha *= m.alpha; dx += m.dx; dy += m.dy; sx *= m.sx; sy *= m.sy; rotAdd += m.rotAdd;
+      if (m.clip) clips.push(m.clip);
+    });
+
+    ctx.save();
+    // Area reveal (wipe/shape/wheel/randombars/split) saling beririsan lewat clip berurutan
+    clips.forEach(clipFn => {
+      ctx.beginPath();
+      clipFn(cx + dx, cy + dy, barSeeds);
+      ctx.clip();
+    });
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha)) * outerAlpha;
+    ctx.translate(cx + dx, cy + dy);
+    ctx.rotate(rot + rotAdd);
+    ctx.scale(Math.max(0.001, sx), Math.max(0.001, sy));
+    ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+    ctx.restore();
+  }
+
   // ---------- RENDER (VIDEO EXPORT) ----------
   let assignedCam = [];
   let assignedEntrance = [];
@@ -1097,13 +1302,14 @@
     const fps = 30;
 
     let checkedEntrance = Array.from(document.querySelectorAll('#entranceList input[type=checkbox]:checked')).map(cb => cb.value);
-    if (checkedEntrance.length === 0) checkedEntrance = ['appear'];
+    if (checkedEntrance.length === 0) checkedEntrance = ['fade'];
 
     const camOptions = ['zoomin','zoomout','panleft','panright','panup','pandown','rotate'];
     const n = state.images.length;
 
     assignedCam = state.images.map(() => camType === 'random' ? camOptions[Math.floor(Math.random()*camOptions.length)] : camType);
-    assignedEntrance = state.images.map(() => checkedEntrance[Math.floor(Math.random()*checkedEntrance.length)]);
+    // Semua gambar memakai kombinasi yang sama persis dari centang yang dipilih (bukan acak per gambar)
+    assignedEntrance = state.images.map(() => checkedEntrance.slice());
     assignedBarSeeds = state.images.map(() => Array.from({length:10}, () => Math.random()*0.45));
 
     const totalDuration = n * durPerImage;
@@ -1144,9 +1350,14 @@
       const cy = H/2 + camT.offY * H + (imgObj.userOffY||0) * H;
       const rot = camT.rot;
 
-      if (lt < entranceDur && eType !== 'appear') {
+      const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
+      if (lt < entranceDur && !isJustAppear) {
         const ep = lt / entranceDur;
-        drawEntranceImage(imgObj.img, eType, ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+        if (eType.length === 1) {
+          drawEntranceImage(imgObj.img, eType[0], ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+        } else {
+          drawEntranceImageCombined(imgObj.img, eType, ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+        }
       } else {
         ctx.save();
         ctx.globalAlpha = alphaMultiplier;
