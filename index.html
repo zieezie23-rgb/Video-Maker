@@ -222,12 +222,13 @@
     pointer-events:none;
   }
   .info-bar{
-    display:flex; justify-content:center; align-items:center; gap:8px;
-    flex-wrap:wrap; margin:26px 0 18px; padding-bottom:8px;
+    display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px;
+    margin:14px 0 18px; padding-bottom:8px;
   }
   .info-btn{
     background:var(--panel-2); border:1px solid var(--line); color:var(--text-dim);
-    padding:8px 12px; font:11px inherit; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; width:100%;
+    min-height:34px; padding:8px 6px; font:11px inherit; cursor:pointer;
   }
   .info-btn:hover{border-color:var(--amber-dim); color:var(--amber);}
   .help-modal{
@@ -244,6 +245,7 @@
   .help-card ol{padding-left:20px; margin:0 0 18px;}
   .help-close{float:right; background:none; border:1px solid var(--line); color:var(--text-dim); padding:4px 8px; cursor:pointer;}
   .help-close:hover{color:var(--amber); border-color:var(--amber-dim);}
+  @media (max-width: 520px){ .info-bar{grid-template-columns:repeat(2, minmax(0, 1fr));} }
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
   @media (max-width: 480px){ .adjust-controls-row{grid-template-columns:1fr;} }
@@ -395,13 +397,6 @@
     <p class="eyebrow">Studio Video — Alat Lokal di Browser</p>
     <h1>MP4 Converter</h1>
   </header>
-
-  <div class="info-bar">
-    <button class="info-btn" id="guideBtn">Panduan</button>
-    <span class="info-btn" aria-label="Versi aplikasi">Versi 1.0.0</span>
-    <a class="info-btn" href="https://wa.me/6282113327262?text=Halo%20Zie%2C%20saya%20butuh%20bantuan%20tentang%20MP4%20Converter." target="_blank" rel="noopener">WhatsApp</a>
-    <a class="info-btn" href="mailto:zichookymirnanda@gmail.com?subject=Bantuan%20MP4%20Converter">Email</a>
-  </div>
 
   <div class="grid">
     <!-- LEFT: CONTROLS -->
@@ -662,6 +657,12 @@
           </div>
         </div>
         <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
+        <div class="info-bar">
+          <button class="info-btn" id="guideBtn">Panduan</button>
+          <span class="info-btn" aria-label="Versi aplikasi">Versi 1.0.0</span>
+          <a class="info-btn" href="https://wa.me/6282113327262?text=Halo%20Zie%2C%20saya%20butuh%20bantuan%20tentang%20MP4%20Converter." target="_blank" rel="noopener">WhatsApp</a>
+          <a class="info-btn" href="mailto:zichookymirnanda@gmail.com?subject=Bantuan%20MP4%20Converter">Email</a>
+        </div>
 
       </div>
     </div>
