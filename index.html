@@ -543,8 +543,13 @@
           <h2>Audio</h2>
           <div class="radio-group" id="audioRadioGroup">
             <label class="radio-opt active"><input type="radio" name="audiomode" value="none" checked> Tanpa Audio</label>
+            <label class="radio-opt"><input type="radio" name="audiomode" value="original"> Ikuti Audio Asli Video</label>
             <label class="radio-opt"><input type="radio" name="audiomode" value="upload"> Unggah Audio</label>
             <label class="radio-opt"><input type="radio" name="audiomode" value="tts"> Teks ke Suara (TTS)</label>
+          </div>
+
+          <div class="bg-sub" id="audioOriginalSec">
+            <div class="note">Memakai audio asli dari tiap berkas video yang diunggah (hanya terdengar selama segmen video itu tampil). Gambar diam tetap tanpa suara. Jika tidak ada berkas video, opsi ini tidak menghasilkan suara.</div>
           </div>
 
           <div class="bg-sub" id="audioUploadSec">
@@ -643,6 +648,23 @@
 (function(){
   const state = { images: [], bgImage: null, audioMode: 'none', audioFile: null, ttsBlob: null };
   let isRendering = false;
+
+  // ---------- AUDIO GRAPH (dipakai saat render untuk menyambungkan audio ke hasil video) ----------
+  let sharedAudioCtx = null;
+  function getAudioCtx(){
+    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (sharedAudioCtx.state === 'suspended') sharedAudioCtx.resume();
+    return sharedAudioCtx;
+  }
+  // Sebuah elemen media hanya boleh dibuatkan MediaElementSourceNode SATU KALI seumur hidupnya,
+  // jadi node-nya dibuat sekali lalu disimpan di item itu sendiri untuk dipakai ulang tiap render.
+  function getVideoAudioSource(item){
+    if (!item._audioSrcNode) {
+      try { item._audioSrcNode = getAudioCtx().createMediaElementSource(item.video); }
+      catch(err) { item._audioSrcNode = null; }
+    }
+    return item._audioSrcNode;
+  }
 
   const fileInput = document.getElementById('fileInput');
   const videoFileInput = document.getElementById('videoFileInput');
@@ -893,6 +915,7 @@
       document.querySelectorAll('#audioRadioGroup .radio-opt').forEach(o => o.classList.remove('active'));
       r.closest('.radio-opt').classList.add('active');
       state.audioMode = r.value;
+      document.getElementById('audioOriginalSec').classList.toggle('show', r.value === 'original');
       audioUploadSec.classList.toggle('show', r.value === 'upload');
       audioTtsSec.classList.toggle('show', r.value === 'tts');
     });
@@ -1505,7 +1528,42 @@
     progressTrack.classList.add('show');
     statusText.textContent = 'Menyiapkan perekaman...';
 
-    const stream = canvas.captureStream(fps);
+    // ---- Siapkan jalur audio (jika dipilih) dan gabungkan dengan stream video canvas ----
+    const canvasStream = canvas.captureStream(fps);
+    let stream = canvasStream;
+    let extraAudioEls = []; // <audio>/<video-proxy> elemen tambahan (upload/tts) yang perlu diputar & dibereskan
+    if (state.audioMode !== 'none') {
+      const actx = getAudioCtx();
+      const audioDest = actx.createMediaStreamDestination();
+
+      if (state.audioMode === 'original') {
+        state.images.forEach(item => {
+          if (item.type === 'video' && item.video) {
+            item.video.muted = false; item.video.volume = 1;
+            const src = getVideoAudioSource(item);
+            if (src) { try { src.disconnect(); } catch(err){} src.connect(audioDest); }
+          }
+        });
+      } else if (state.audioMode === 'upload' && state.audioFile) {
+        const audioEl = new Audio(URL.createObjectURL(state.audioFile));
+        audioEl.loop = false;
+        const src = actx.createMediaElementSource(audioEl);
+        src.connect(audioDest);
+        extraAudioEls.push(audioEl);
+      } else if (state.audioMode === 'tts' && state.ttsBlob) {
+        const audioEl = new Audio(URL.createObjectURL(state.ttsBlob));
+        audioEl.loop = false;
+        const src = actx.createMediaElementSource(audioEl);
+        src.connect(audioDest);
+        extraAudioEls.push(audioEl);
+      }
+
+      const audioTracks = audioDest.stream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        stream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+      }
+    }
+
     const mimeType = pickMimeType();
     let recorder;
     try {
@@ -1700,12 +1758,14 @@
     }
 
     recorder.start();
+    extraAudioEls.forEach(a => { try { a.currentTime = 0; a.play().catch(()=>{}); } catch(err){} });
     const startTime = performance.now();
     requestAnimationFrame(videoMode === 'frame' ? frameCombinedMode : frame);
 
     await finished;
 
     state.images.forEach(item => { if (item.type === 'video' && item.video) { try { item.video.pause(); } catch(err){} } });
+    extraAudioEls.forEach(a => { try { a.pause(); } catch(err){} });
 
     const blob = new Blob(chunks, { type: actualMime.split(';')[0] });
     const url = URL.createObjectURL(blob);
