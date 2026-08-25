@@ -352,8 +352,8 @@
             <label class="radio-opt active"><input type="radio" name="uploadcat" value="image" checked> Gambar</label>
             <label class="radio-opt"><input type="radio" name="uploadcat" value="video"> Video</label>
           </div>
-          <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
-          <input type="file" id="videoFileInput" accept="video/*" multiple style="display:none;">
+          <input type="file" id="fileInput" accept="image/*,application/octet-stream" multiple style="display:none;">
+          <input type="file" id="videoFileInput" accept="video/*,application/octet-stream" multiple style="display:none;">
           <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
           <button class="btn-upload" id="btnPickVideos" style="display:none;">+ Pilih Video (bisa lebih dari satu)</button>
           <div class="thumbs" id="thumbs"></div>
@@ -404,7 +404,7 @@
           </div>
 
           <div class="bg-sub" id="bgImage">
-            <input type="file" id="bgImageInput" accept="image/*" style="display:none;">
+            <input type="file" id="bgImageInput" accept="image/*,application/octet-stream" style="display:none;">
             <button class="btn-upload" id="btnPickBg">+ Pilih Gambar Latar</button>
             <div class="thumbs" id="bgThumb"></div>
           </div>
@@ -675,8 +675,14 @@
 
   // ---------- IMAGE UPLOAD ----------
   btnPickImages.addEventListener('click', () => fileInput.click());
+  // Validasi tipe berkas manual (accept dialog dilonggarkan supaya Android tidak memaksa Photo Picker/cloud saja)
+  function isImageFile(f){ return (f.type && f.type.startsWith('image/')) || /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif|svg)$/i.test(f.name||''); }
+  function isVideoFile(f){ return (f.type && f.type.startsWith('video/')) || /\.(mp4|mov|webm|mkv|avi|3gp|m4v)$/i.test(f.name||''); }
+
   fileInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files || []);
+    const allFiles = Array.from(e.target.files || []);
+    const files = allFiles.filter(isImageFile);
+    if (files.length < allFiles.length) alert('Beberapa berkas dilewati karena bukan berformat gambar.');
     files.forEach(f => {
       const url = URL.createObjectURL(f);
       const img = new Image();
@@ -693,7 +699,9 @@
   // ---------- VIDEO UPLOAD ----------
   btnPickVideos.addEventListener('click', () => videoFileInput.click());
   videoFileInput.addEventListener('change', (e) => {
-    const files = Array.from(e.target.files || []);
+    const allFiles = Array.from(e.target.files || []);
+    const files = allFiles.filter(isVideoFile);
+    if (files.length < allFiles.length) alert('Beberapa berkas dilewati karena bukan berformat video.');
     files.forEach(f => {
       const url = URL.createObjectURL(f);
       const video = document.createElement('video');
@@ -813,6 +821,7 @@
   bgImageInput.addEventListener('change', (e) => {
     const f = e.target.files[0];
     if (!f) return;
+    if (!isImageFile(f)) { alert('Berkas yang dipilih bukan berformat gambar.'); bgImageInput.value=''; return; }
     const url = URL.createObjectURL(f);
     const img = new Image();
     img.onload = () => { state.bgImage = {img, url}; bgThumb.innerHTML = `<div class="thumb"><img src="${url}"></div>`; };
