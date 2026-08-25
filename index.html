@@ -221,6 +221,29 @@
     color:var(--text-dim); font-size:11px; letter-spacing:.05em;
     pointer-events:none;
   }
+  .info-bar{
+    display:flex; justify-content:center; align-items:center; gap:8px;
+    flex-wrap:wrap; margin:26px 0 18px; padding-bottom:8px;
+  }
+  .info-btn{
+    background:var(--panel-2); border:1px solid var(--line); color:var(--text-dim);
+    padding:8px 12px; font:11px inherit; cursor:pointer;
+  }
+  .info-btn:hover{border-color:var(--amber-dim); color:var(--amber);}
+  .help-modal{
+    position:fixed; inset:0; z-index:10000; display:none; align-items:center;
+    justify-content:center; padding:20px; background:rgba(0,0,0,.7);
+  }
+  .help-modal.show{display:flex;}
+  .help-card{
+    width:min(480px, 100%); background:var(--panel); border:1px solid var(--line);
+    padding:22px; box-shadow:0 12px 40px rgba(0,0,0,.5);
+  }
+  .help-card h2{font-family:Georgia,serif; font-weight:400; color:var(--amber); margin:0 0 14px;}
+  .help-card p, .help-card li{font-size:12px; color:var(--text-dim); line-height:1.6;}
+  .help-card ol{padding-left:20px; margin:0 0 18px;}
+  .help-close{float:right; background:none; border:1px solid var(--line); color:var(--text-dim); padding:4px 8px; cursor:pointer;}
+  .help-close:hover{color:var(--amber); border-color:var(--amber-dim);}
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
   @media (max-width: 480px){ .adjust-controls-row{grid-template-columns:1fr;} }
@@ -651,6 +674,27 @@
   </div>
 </div>
 
+<div class="info-bar">
+  <button class="info-btn" id="guideBtn">Panduan</button>
+  <span class="info-btn" aria-label="Versi aplikasi">Versi 1.0.0</span>
+  <a class="info-btn" href="https://wa.me/6282113327262?text=Halo%20Zie%2C%20saya%20butuh%20bantuan%20tentang%20MP4%20Converter." target="_blank" rel="noopener">WhatsApp</a>
+  <a class="info-btn" href="mailto:zichookymirnanda@gmail.com?subject=Bantuan%20MP4%20Converter">Email</a>
+</div>
+
+<div class="help-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-card">
+    <button class="help-close" id="helpClose" type="button">Tutup</button>
+    <h2 id="helpTitle">Panduan Singkat</h2>
+    <ol>
+      <li>Unggah satu atau beberapa gambar/video.</li>
+      <li>Pilih latar, animasi, gerakan kamera, dan audio bila diperlukan.</li>
+      <li>Atur ukuran serta posisi file pada area Pratinjau.</li>
+      <li>Tekan <b>Buat Video</b>, lalu isi nama file dan tekan <b>Unduh</b>.</li>
+    </ol>
+    <p>Versi saat ini: 1.0.0. Untuk bantuan, hubungi Zie melalui WhatsApp atau email.</p>
+  </div>
+</div>
+
 <script>
 (function(){
   const state = { images: [], bgImage: null, audioMode: 'none', audioFile: null, ttsBlob: null };
@@ -689,7 +733,16 @@
   const downloadLink = document.getElementById('downloadLink');
   const fileNameInput = document.getElementById('fileNameInput');
   const formatNote = document.getElementById('formatNote');
+  const helpModal = document.getElementById('helpModal');
+  const guideBtn = document.getElementById('guideBtn');
+  const helpClose = document.getElementById('helpClose');
   let lastExt = 'mp4';
+
+  guideBtn.addEventListener('click', () => helpModal.classList.add('show'));
+  helpClose.addEventListener('click', () => helpModal.classList.remove('show'));
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) helpModal.classList.remove('show');
+  });
 
   function sanitizeFileName(raw){
     return raw.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-');
