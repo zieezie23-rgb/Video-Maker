@@ -388,6 +388,12 @@
     font-size:11px; color:var(--text-dim); margin-top:10px; line-height:1.5;
     border-left:2px solid var(--amber-dim); padding-left:8px;
   }
+
+  .project-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .btn-secondary{border:1px solid var(--amber-dim);background:rgba(255,255,255,.04);color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;font-size:12px}
+  .btn-secondary:hover{background:rgba(255,255,255,.08)}
+  .project-status{font-size:11px;color:var(--text-dim)}
+
 </style>
 </head>
 <body>
@@ -396,6 +402,12 @@
   <header>
     <p class="eyebrow">Studio Video — Alat Lokal di Browser</p>
     <h1>MP4 Converter</h1>
+    <div class="project-bar">
+      <button class="btn-secondary" id="btnSaveProject" type="button">💾 Simpan Project</button>
+      <button class="btn-secondary" id="btnLoadProject" type="button">📂 Buka Project</button>
+      <input id="projectFileInput" type="file" accept="application/json,.json" hidden>
+      <span id="projectStatus" class="project-status"></span>
+    </div>
   </header>
 
   <div class="grid">
@@ -1552,23 +1564,166 @@
     if (onProgress) ffmpeg.on('progress', ({ progress }) => onProgress(Math.max(0, Math.min(1, progress))));
     await ffmpeg.writeFile(inputName, await fetchFile(blob));
 
-    async function run(args){
-      await ffmpeg.exec(args);
-      return await ffmpeg.readFile(outputName);
-    }
-
-    let data;
-    try {
-      // Coba dulu remux cepat tanpa re-encode (hanya berhasil kalau video/audio sudah H.264/AAC).
-      data = await run(['-i', inputName, '-c', 'copy', '-movflags', '+faststart', outputName]);
-    } catch (err) {
-      // Kalau gagal (mis. sumbernya WebM/VP9/Opus), transcode penuh ke H.264 + AAC.
-      data = await run(['-i', inputName, '-c:v', 'libx264', '-preset', 'fast', '-crf', '20',
-                         '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k',
-                         '-movflags', '+faststart', outputName]);
-    }
+    // Selalu encode ulang ke kombinasi yang paling umum dibaca editor Android.
+    // Jangan gunakan -c copy sebagai jalur utama karena hasil MediaRecorder bisa berupa
+    // fragmented MP4/WebM yang dapat diputar tetapi ditolak oleh editor tertentu.
+    const args = [
+      '-i', inputName,
+      '-map', '0:v:0',
+      '-map', '0:a:0?',
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-profile:v', 'main',
+      '-level', '4.0',
+      '-pix_fmt', 'yuv420p',
+      '-r', '30',
+      '-crf', '19',
+      '-c:a', 'aac',
+      '-b:a', '160k',
+      '-ar', '48000',
+      '-movflags', '+faststart',
+      outputName
+    ];
+    await ffmpeg.exec(args);
+    const data = await ffmpeg.readFile(outputName);
     return new Blob([data.buffer], { type: 'video/mp4' });
   }
+
+  // ---------- PROJECT: simpan/buka project yang masih bisa diedit di aplikasi ini ----------
+  const btnSaveProject = document.getElementById('btnSaveProject');
+  const btnLoadProject = document.getElementById('btnLoadProject');
+  const projectFileInput = document.getElementById('projectFileInput');
+  const projectStatus = document.getElementById('projectStatus');
+
+  function blobToDataURL(blob){
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function urlToDataURL(url){
+    const res = await fetch(url);
+    return await blobToDataURL(await res.blob());
+  }
+
+  function dataURLToFile(dataURL, name){
+    const parts = String(dataURL).split(',');
+    const mime = (parts[0].match(/data:([^;]+)/) || [,'application/octet-stream'])[1];
+    const bytes = atob(parts[1]);
+    const arr = new Uint8Array(bytes.length);
+    for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+    return new File([arr], name || 'asset', {type:mime});
+  }
+
+  function collectProjectControls(){
+    const controls = {};
+    document.querySelectorAll('input,select,textarea').forEach(el => {
+      if(!el.id || el.type === 'file' || el.id === 'projectFileInput') return;
+      if(el.type === 'radio' || el.type === 'checkbox') controls[el.id] = {checked:el.checked, value:el.value};
+      else controls[el.id] = {value:el.value};
+    });
+    controls.__radios = {};
+    ['videomode','bgmode','audiomode'].forEach(name => {
+      const el=document.querySelector(`input[name="${name}"]:checked`);
+      if(el) controls.__radios[name]=el.value;
+    });
+    return controls;
+  }
+
+  function applyProjectControls(controls){
+    if(!controls) return;
+    Object.entries(controls).forEach(([id,v])=>{
+      if(id==='__radios') return;
+      const el=document.getElementById(id); if(!el) return;
+      if(el.type==='radio'||el.type==='checkbox') el.checked=!!v.checked;
+      else if('value' in v) el.value=v.value;
+    });
+    const radios=controls.__radios||{};
+    Object.entries(radios).forEach(([name,value])=>{
+      const r=document.querySelector(`input[name="${name}"][value="${CSS.escape(value)}"]`);
+      if(r){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); }
+    });
+    document.getElementById('ttsPitchVal').textContent=document.getElementById('ttsPitch').value;
+    document.getElementById('ttsRateVal').textContent=document.getElementById('ttsRate').value;
+    if(typeof syncSlidersToSelected==='function') syncSlidersToSelected();
+  }
+
+  async function saveProject(){
+    if(!state.images.length){ alert('Tambahkan gambar atau video terlebih dahulu.'); return; }
+    projectStatus.textContent='Menyiapkan project...';
+    const assets=[];
+    for(const item of state.images){
+      const sourceUrl=item.type==='video' ? (item.video.currentSrc || item.video.src) : item.url;
+      assets.push({
+        type:item.type, name:item.name, userScale:item.userScale||1, userOffX:item.userOffX||0, userOffY:item.userOffY||0,
+        data:await urlToDataURL(sourceUrl)
+      });
+    }
+    const project={
+      format:'studio-video-project', version:2, createdAt:new Date().toISOString(),
+      controls:collectProjectControls(), selectedImageIndex,
+      assets,
+      background:state.bgImage ? {name:'background',data:await urlToDataURL(state.bgImage.url)} : null,
+      audio:state.audioFile ? {name:state.audioFile.name,data:await blobToDataURL(state.audioFile)} : null,
+      tts:state.ttsBlob ? {name:'tts.webm',data:await blobToDataURL(state.ttsBlob)} : null
+    };
+    const blob=new Blob([JSON.stringify(project)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=sanitizeFileName(fileNameInput.value||'video-project')+'.json'; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    projectStatus.textContent='Project tersimpan ✓';
+  }
+
+  function clearProjectMedia(){
+    state.images.forEach(item=>{ try{ if(item.video)item.video.pause(); }catch(e){} try{URL.revokeObjectURL(item.video?item.video.src:item.url)}catch(e){} });
+    state.images=[]; state.bgImage=null; state.audioFile=null; state.ttsBlob=null;
+    selectedImageIndex=0;
+    renderThumbs(); renderAdjustThumbs(); updateRenderButton();
+  }
+
+  async function loadProject(project){
+    if(!project || project.format!=='studio-video-project') throw new Error('File project tidak dikenali.');
+    projectStatus.textContent='Membuka project...';
+    clearProjectMedia();
+    applyProjectControls(project.controls);
+
+    const files=project.assets.map(a=>dataURLToFile(a.data,a.name));
+    if(files.length){
+      const dt=new DataTransfer(); files.forEach(f=>dt.items.add(f));
+      fileInput.files=dt.files; fileInput.dispatchEvent(new Event('change',{bubbles:true}));
+      await new Promise(r=>setTimeout(r,700));
+    }
+    // Pulihkan ukuran/posisi tiap asset setelah semua asset masuk.
+    project.assets.forEach((a,i)=>{ if(state.images[i]){state.images[i].userScale=a.userScale||1;state.images[i].userOffX=a.userOffX||0;state.images[i].userOffY=a.userOffY||0;} });
+
+    if(project.background){
+      const f=dataURLToFile(project.background.data,'background');
+      const url=URL.createObjectURL(f), img=new Image();
+      state.bgImage={img,url};
+      await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=url;});
+      bgThumb.innerHTML='<div class="filerow"><span class="fname">Background project</span></div>';
+    }
+    if(project.audio){
+      state.audioFile=dataURLToFile(project.audio.data,project.audio.name||'audio');
+      audioFileName.textContent=`Audio dipilih: ${state.audioFile.name}`;
+    }
+    if(project.tts){ state.ttsBlob=dataURLToFile(project.tts.data,'tts.webm'); }
+    selectedImageIndex=Math.min(project.selectedImageIndex||0,Math.max(0,state.images.length-1));
+    renderThumbs(); renderAdjustThumbs(); updateAdjustPreview(); syncSlidersToSelected();
+    projectStatus.textContent='Project dibuka ✓';
+  }
+
+  btnSaveProject.addEventListener('click',()=>saveProject().catch(e=>{console.error(e);projectStatus.textContent='Gagal menyimpan project';alert('Gagal menyimpan project: '+e.message);}));
+  btnLoadProject.addEventListener('click',()=>projectFileInput.click());
+  projectFileInput.addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f)return;
+    try{ await loadProject(JSON.parse(await f.text())); }
+    catch(err){ console.error(err); projectStatus.textContent='Project gagal dibuka'; alert('Gagal membuka project: '+err.message); }
+    projectFileInput.value='';
+  });
 
   btnRender.addEventListener('click', async () => {
     if (state.images.length === 0) return;

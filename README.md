@@ -1,80 +1,189 @@
-# Gambar ke Video — Studio Montase Lokal di Browser
+# MP4 Converter — Studio Video
 
-Alat satu-halaman (`index.html`) untuk menyusun gambar dan video jadi satu video montase — lengkap dengan animasi kemunculan, gerakan kamera (Ken Burns), transisi, latar, dan audio. **Semua diproses langsung di browser** (client-side), tidak ada berkas yang diunggah ke server mana pun.
+Aplikasi web lokal untuk membuat video dari gambar dan video langsung di browser.
 
-Dibuat oleh: **Zie**
+## Fitur
 
----
+- Menggabungkan beberapa gambar/video menjadi satu video.
+- Mode **Gabung** dan **Satu Frame**.
+- Pilihan latar belakang:
+  - Tanpa latar
+  - Warna polos
+  - Gradasi
+  - Gambar
+- Pengaturan ukuran dan posisi media.
+- Animasi masuk dan efek kamera.
+- Transisi antar media.
+- Dukungan audio/TTS sesuai fitur yang tersedia di aplikasi.
+- Preview sebelum hasil disimpan.
+- Export video ke **MP4** yang dioptimalkan untuk kompatibilitas editor video.
+- Penyimpanan dan pembukaan **Project** agar pengaturan proyek dapat diedit kembali di aplikasi.
 
-## Cara Menjalankan
+## Format Video Hasil
 
-Tidak perlu instalasi atau server. Cukup buka `index.html` langsung di browser modern (disarankan Chrome/Edge terbaru untuk dukungan MediaRecorder & format MP4 terbaik).
+Video hasil export ditujukan agar lebih mudah digunakan pada aplikasi editor seperti CapCut, VN, Alight Motion, KineMaster, dan editor video lain yang mendukung MP4.
 
----
+Proses kompatibilitas menggunakan:
 
-## Fitur Utama
+- MP4
+- H.264 / AVC
+- AAC
+- Pixel format `yuv420p`
+- `faststart` untuk struktur MP4 yang lebih kompatibel
 
-### 1. Unggah (Panel 01)
-- Dua kategori: **Gambar** dan **Video** (bisa dicampur dalam satu urutan/timeline).
-- Bisa unggah banyak berkas sekaligus.
-- Urutan thumbnail = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan, atau tombol × untuk menghapus.
-- Berkas video ditandai ikon 🎬 pada thumbnail-nya dan diputar **tanpa suara** di dalam hasil video (gunakan panel Audio jika ingin menambahkan suara).
+> **Catatan:** MP4 hasil export adalah video final/flattened. Elemen seperti gambar, background, animasi, dan transisi tidak menjadi layer terpisah di CapCut atau editor lain.
 
-### 2. Latar Belakang (Panel 02)
-Pilihan mode:
-- **Tidak Ada (Transparan)** — *default*. Tidak menggambar latar apa pun. Catatan: kebanyakan format video tidak mendukung transparansi, jadi area kosong bisa tampil hitam saat direkam jadi berkas video.
-- **Warna Polos**
-- **Gradasi** (2 warna, 5 arah: atas-bawah, kiri-kanan, diagonal ↘, diagonal ↙, radial)
-- **Unggah Gambar** — pakai gambar sendiri sebagai latar.
+## Project yang Bisa Diedit Kembali
 
-Juga ada **Mode Tampilan Gambar Utama**: Contain (latar terlihat di sisi) atau Cover (gambar dipotong mengisi layar).
+Untuk mempertahankan struktur proyek, gunakan fitur **Simpan Project**.
 
-### 3. Animasi Kemunculan (Panel 03)
-12 jenis animasi: Fade, Fly In, Float In, Split, Wipe, Shape, Wheel, Random Bars, Grow & Turn, Zoom, Swivel, Bounce.
-- Bisa centang lebih dari satu — akan digabung jadi satu gerakan kemunculan.
-- **Default: tidak ada yang dicentang** → gambar/video langsung muncul tanpa animasi (instan).
+File project menyimpan pengaturan yang diperlukan aplikasi untuk membuka kembali proyek, termasuk pengaturan media, posisi, ukuran, durasi, animasi, transisi, background, dan pengaturan proyek lainnya yang didukung aplikasi.
 
-### 4. Kamera & Transisi (Panel 04)
-- **Mode Video**:
-  - **Gabung (Satu per Satu)** — perilaku standar: gambar/video berikutnya menggantikan yang sebelumnya, dengan efek transisi di antaranya.
-  - **Satu Frame (Semua Tetap Tampil)** — tiap item muncul satu per satu memakai animasi kemunculan yang dipilih, tapi **tidak tergantikan** oleh item berikutnya. Semua tetap ada di layar sampai akhir video, sementara kamera bergerak sebagai satu kesatuan di atas seluruh scene. Atur ukuran/posisi tiap item lewat panel Pratinjau agar tidak saling menumpuk penuh.
-- **Gerakan Kamera (Ken Burns)**: Diam, Zoom In, Zoom Out, Pan kiri/kanan/atas/bawah, Putar Halus, atau Acak (beda tiap gambar).
-- **Efek Transisi** (hanya untuk Mode "Gabung"): Potong Langsung, Fade, Slide, Wipe.
-- **Durasi Tiap Gambar Muncul** (detik, bisa diatur).
-- **Resolusi Video**: 1280×720, 1920×1080, 720×1280 (*default*, portrait/story), 1080×1080.
+Alurnya:
 
-### 5. Audio (Panel 05)
-- **Tanpa Audio**
-- **Unggah Audio** — pakai berkas audio sendiri.
-- **Teks ke Suara (TTS)** — tulis teks, pilih suara/pitch/kecepatan, dengarkan pratinjau, lalu rekam suaranya ke video lewat berbagi tab audio browser (klik "Rekam Suara untuk Video", pilih **Tab Ini**, centang **Bagikan audio tab**).
-
-### 6. Pratinjau & Pengaturan Ukuran/Posisi
-- Panel kanan menampilkan pratinjau langsung (live) tanpa perlu merender ulang.
-- Pilih gambar/video dari deretan thumbnail pratinjau, lalu atur:
-  - **Ukuran** (40%–220%, lewat slider atau tombol +/−)
-  - **Posisi X/Y** (lewat tombol arah atau tombol tengahkan)
-- Tombol **↺ Kembalikan ke Semula** mengembalikan ukuran & posisi item terpilih ke default.
-- Tombol **Buat Video** berada tepat di bawah tombol reset tersebut.
-
-### 7. Unduh Hasil
-- Setelah render selesai, video bisa langsung diputar di pratinjau dan diunduh.
-- Format otomatis MP4 jika didukung browser, atau WebM sebagai fallback (dengan catatan bisa dikonversi ke MP4 lewat alat lain).
-- Nama file bisa diatur manual sebelum diunduh.
-
----
-
-## Catatan Teknis
-
-- Semua render dilakukan dengan Canvas 2D + `MediaRecorder` API (merekam `canvas.captureStream()`), berjalan real-time di browser saat tombol render ditekan — jangan pindah tab/menutup halaman selama proses berlangsung.
-- Video yang diunggah tidak membawa audionya sendiri ke hasil akhir (gunakan panel Audio secara terpisah).
-- Transparansi latar ("Tidak Ada") berfungsi normal di pratinjau canvas, tapi umumnya tidak terekam sebagai transparan pada file video akhir (tergantung dukungan encoder browser).
-- Tidak ada data yang dikirim ke server — seluruh proses (baca berkas, animasi, render, TTS, ekspor) terjadi di perangkat pengguna.
-
----
-
-## Struktur Berkas
-
+```text
+Project
+   ↓
+Simpan Project
+   ↓
+video-project.json
+   ↓
+Buka Project
+   ↓
+Edit kembali di aplikasi
+   ↓
+Export MP4
 ```
-index.html   # Seluruh aplikasi (HTML + CSS + JS) dalam satu berkas, tanpa dependensi eksternal
-README.md    # Dokumentasi ini
+
+Jadi:
+
+- **MP4** → untuk dibagikan atau diedit sebagai video di aplikasi lain.
+- **Project JSON** → untuk melanjutkan pengeditan proyek di aplikasi ini.
+
+## Cara Menggunakan
+
+### 1. Menjalankan aplikasi
+
+Aplikasi dapat dijalankan sebagai halaman web dengan membuka:
+
+```text
+index.html
 ```
+
+Tidak membutuhkan instalasi server khusus untuk penggunaan dasar.
+
+### 2. Memasukkan media
+
+Klik tombol:
+
+```text
++ Pilih Gambar
+```
+
+Kemudian pilih gambar atau video yang ingin digunakan.
+
+Format media yang didukung aplikasi mencakup format gambar dan video yang dapat dibaca browser.
+
+### 3. Atur proyek
+
+Sesuaikan:
+
+- urutan media
+- durasi
+- posisi
+- ukuran
+- background
+- animasi
+- efek kamera
+- transisi
+- audio
+
+### 4. Export
+
+Klik tombol **Buat Video**.
+
+Aplikasi akan merender proyek melalui Canvas dan kemudian memproses hasilnya menjadi MP4 yang lebih kompatibel.
+
+## Struktur File
+
+Struktur sederhana repository:
+
+```text
+/
+├── index.html
+└── README.md
+```
+
+Jika nantinya terdapat aset eksternal, struktur dapat dikembangkan menjadi:
+
+```text
+/
+├── index.html
+├── README.md
+└── assets/
+    ├── images/
+    ├── audio/
+    └── video/
+```
+
+## Kompatibilitas
+
+Aplikasi menggunakan kemampuan browser seperti:
+
+- Canvas
+- MediaRecorder
+- Web Audio API
+- FFmpeg WebAssembly untuk kompatibilitas MP4
+
+Karena proses render dilakukan di browser, performa sangat bergantung pada perangkat dan browser yang digunakan.
+
+Pada perangkat Android dengan RAM atau CPU terbatas, proses export video yang panjang atau beresolusi tinggi dapat membutuhkan waktu lebih lama.
+
+## FFmpeg WebAssembly
+
+Untuk proses kompatibilitas MP4, aplikasi menggunakan FFmpeg WebAssembly yang dimuat melalui CDN.
+
+Saat proses ini digunakan, browser perlu memiliki akses internet untuk mengambil komponen FFmpeg jika komponen tersebut belum tersedia di cache.
+
+## Catatan Penting
+
+### MP4 bukan project editing
+
+File MP4 hanya menyimpan hasil akhir video. MP4 tidak mempertahankan:
+
+- layer gambar
+- layer background
+- keyframe aplikasi
+- pengaturan animasi asli
+- pengaturan transisi asli
+
+Karena itu, selalu simpan file **Project JSON** jika proyek masih ingin diedit kembali.
+
+### Keamanan
+
+Aplikasi dirancang untuk melakukan proses utama di browser. File media yang dipilih digunakan oleh aplikasi untuk proses preview dan rendering.
+
+Tetap periksa izin browser dan sumber file yang digunakan.
+
+## Pengembangan
+
+Repository ini dapat digunakan sebagai dasar untuk pengembangan lebih lanjut, misalnya:
+
+- timeline video
+- layer editor
+- keyframe
+- crop
+- rotate
+- filter
+- subtitle
+- pengaturan volume
+- fade audio
+- pilihan FPS
+- pilihan bitrate
+- template video
+- undo/redo
+- autosave project
+
+## Lisensi
+
+Tambahkan informasi lisensi sesuai kebutuhan proyek.
