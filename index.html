@@ -26,7 +26,8 @@
     font-family: 'Courier New', ui-monospace, monospace;
     min-height:100vh;
   }
-  .wrap{max-width:1220px;margin:0 auto;padding:28px 20px 60px;}
+  .wrap{max-width:1220px;margin:0 auto;padding:28px 20px 100px; min-width:0;}
+  html,body{overflow-x:hidden;}
 
   header{margin-bottom:26px;}
   .eyebrow{
@@ -49,12 +50,14 @@
     display:grid;
     grid-template-columns: 1.25fr 1fr;
     gap:20px;
+    min-width:0;
   }
+  .grid > div{ min-width:0; }
   @media (max-width: 940px){ .grid{grid-template-columns:1fr;} }
 
-  .panel-group{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+  .panel-group{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; min-width:0; }
   .panel-group:first-child{ margin-top:0; }
-  .panel-group .panel{ margin-top:0 !important; }
+  .panel-group .panel{ margin-top:0 !important; min-width:0; }
   .panel + .panel-group, .panel-group + .panel, .panel-group + .panel-group{ margin-top:18px; }
   @media (max-width: 420px){ .panel-group{grid-template-columns:1fr;} }
 
@@ -64,6 +67,7 @@
     border-radius:2px;
     padding:20px 20px 22px;
     position:relative;
+    min-width:0;
   }
   .panel + .panel{margin-top:18px;}
   .panel::before{
@@ -142,25 +146,26 @@
   .filerow .mv{ display:flex; gap:4px; flex-shrink:0; }
   .filerow .mv button{ background:var(--panel); color:var(--text); border:1px solid var(--line); width:20px; height:20px; font-size:11px; }
   .filerow .rm{ flex-shrink:0; background:var(--panel); color:var(--danger); border:1px solid var(--line); width:20px; height:20px; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center; }
-  .adjust-row-thumbs{
-    display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto;
-    padding-bottom:4px;
+  .adjust-filelist{
+    display:flex; flex-wrap:wrap; gap:6px; margin-bottom:2px; min-width:0;
   }
-  .adjust-row-thumbs::-webkit-scrollbar{ height:6px; }
-  .adjust-row-thumbs::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
-  .adjust-row-thumbs .thumb{ flex-shrink:0; }
-  .thumb{ position:relative; width:78px; height:78px; border:1px solid var(--line); overflow:hidden; border-radius:2px; background:#000; }
-  .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
-  .thumb .idx{ position:absolute; top:2px; left:3px; font-size:10px; background:rgba(0,0,0,.6); padding:0 4px; color:var(--amber); }
-  .thumb .rm{ position:absolute; top:2px; right:2px; background:rgba(0,0,0,.65); color:var(--danger); border:none; width:18px; height:18px; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center; }
-  .thumb .mv{ position:absolute; bottom:2px; display:flex; width:100%; justify-content:center; gap:4px; }
-  .thumb .mv button{ background:rgba(0,0,0,.65); color:var(--text); border:none; width:16px; height:16px; font-size:10px; }
+  .adjust-file-chip{
+    display:flex; align-items:center; gap:6px; max-width:100%;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:2px;
+    padding:6px 10px; font-size:11.5px; color:var(--text-dim); cursor:pointer;
+  }
+  .adjust-file-chip:hover{ border-color:var(--amber-dim); }
+  .adjust-file-chip.selected{ border-color:var(--amber); color:var(--text); }
+  .adjust-file-chip .idx{ color:var(--amber); flex-shrink:0; }
+  .adjust-file-chip .fname{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:42vw; }
+  .adjust-file-chip .tag{ flex-shrink:0; }
 
   .main-btn{
-    width:100%;
+    position:fixed; left:0; right:0; bottom:0; width:100%;
     background: linear-gradient(180deg, var(--amber), var(--amber-dim));
     color:#1a1408; border:none; font-weight:bold; font-size:14px;
-    letter-spacing:.06em; text-transform:uppercase; padding:14px; margin-top:6px;
+    letter-spacing:.06em; text-transform:uppercase; padding:16px; margin:0;
+    z-index:9998; box-shadow:0 -6px 16px rgba(0,0,0,.45);
   }
   .main-btn:disabled{ background:var(--line); color:var(--text-dim); cursor:not-allowed; }
   .main-btn:not(:disabled):hover{filter:brightness(1.08);}
@@ -195,10 +200,8 @@
   .note{font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5;}
   .credit-tag{
     position:fixed; left:12px; bottom:10px; z-index:9999;
-    background:rgba(20,18,15,.75); border:1px solid var(--line);
     color:var(--text-dim); font-size:11px; letter-spacing:.05em;
-    padding:5px 10px; border-radius:2px; pointer-events:none;
-    backdrop-filter:blur(2px);
+    pointer-events:none;
   }
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
@@ -257,7 +260,7 @@
   }
   .anim-row{
     display:grid;
-    grid-template-columns: 16px 30px 1fr;
+    grid-template-columns: 16px 46px 1fr;
     align-items:center;
     gap:5px;
     padding:6px 5px;
@@ -269,12 +272,12 @@
   .anim-row .label-txt b{ color:var(--amber); font-weight:normal; }
 
   .demo{
-    width:28px; height:22px; background:#0b0a08; border:1px solid var(--line);
+    width:44px; height:34px; background:#0b0a08; border:1px solid var(--line);
     border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
   }
   .demo-inner{
     position:absolute; inset:0; margin:auto;
-    width:12px; height:12px;
+    width:19px; height:19px;
     background: linear-gradient(135deg, var(--amber), #6b3f14);
     border-radius:2px;
   }
@@ -294,13 +297,13 @@
   .demo-split{ }
   .demo-split .demo-inner{ display:none; }
   .demo-split::before, .demo-split::after{
-    content:''; position:absolute; top:5px; width:7px; height:14px;
+    content:''; position:absolute; top:8px; width:11px; height:22px;
     background:linear-gradient(135deg, var(--amber), #6b3f14);
   }
-  .demo-split::before{ left:7px; animation: dSplitL 1.6s ease-in-out infinite; }
-  .demo-split::after{ right:7px; animation: dSplitR 1.6s ease-in-out infinite; }
-  @keyframes dSplitL{ 0%{ transform:translateX(-9px);} 55%,100%{ transform:translateX(0);} }
-  @keyframes dSplitR{ 0%{ transform:translateX(9px);} 55%,100%{ transform:translateX(0);} }
+  .demo-split::before{ left:11px; animation: dSplitL 1.6s ease-in-out infinite; }
+  .demo-split::after{ right:11px; animation: dSplitR 1.6s ease-in-out infinite; }
+  @keyframes dSplitL{ 0%{ transform:translateX(-14px);} 55%,100%{ transform:translateX(0);} }
+  @keyframes dSplitR{ 0%{ transform:translateX(14px);} 55%,100%{ transform:translateX(0);} }
   /* Wipe */
   .demo-wipe .demo-inner{ animation: dWipe 1.6s ease-in-out infinite; clip-path: inset(0 100% 0 0); }
   @keyframes dWipe{ 0%{ clip-path: inset(0 100% 0 0);} 60%,100%{ clip-path: inset(0 0 0 0);} }
@@ -318,12 +321,12 @@
   }
   /* Random Bars */
   .demo-randombars .demo-inner{ display:none; }
-  .demo-randombars .bar{ position:absolute; top:4px; width:3px; height:14px; background:linear-gradient(135deg, var(--amber), #6b3f14); }
-  .demo-randombars .bar:nth-child(1){ left:5px; animation: dBar 1.6s steps(1) infinite; animation-delay:0s; }
-  .demo-randombars .bar:nth-child(2){ left:10px; animation: dBar 1.6s steps(1) infinite; animation-delay:.25s; }
-  .demo-randombars .bar:nth-child(3){ left:15px; animation: dBar 1.6s steps(1) infinite; animation-delay:.05s; }
-  .demo-randombars .bar:nth-child(4){ left:20px; animation: dBar 1.6s steps(1) infinite; animation-delay:.35s; }
-  .demo-randombars .bar:nth-child(5){ left:24px; animation: dBar 1.6s steps(1) infinite; animation-delay:.15s; }
+  .demo-randombars .bar{ position:absolute; top:6px; width:5px; height:22px; background:linear-gradient(135deg, var(--amber), #6b3f14); }
+  .demo-randombars .bar:nth-child(1){ left:7px; animation: dBar 1.6s steps(1) infinite; animation-delay:0s; }
+  .demo-randombars .bar:nth-child(2){ left:15px; animation: dBar 1.6s steps(1) infinite; animation-delay:.25s; }
+  .demo-randombars .bar:nth-child(3){ left:23px; animation: dBar 1.6s steps(1) infinite; animation-delay:.05s; }
+  .demo-randombars .bar:nth-child(4){ left:31px; animation: dBar 1.6s steps(1) infinite; animation-delay:.35s; }
+  .demo-randombars .bar:nth-child(5){ left:37px; animation: dBar 1.6s steps(1) infinite; animation-delay:.15s; }
   @keyframes dBar{ 0%{opacity:0;} 30%,100%{opacity:1;} 100%{opacity:1;} }
   /* Grow & Turn */
   .demo-growturn .demo-inner{ animation: dGrowTurn 1.8s cubic-bezier(.2,.9,.3,1.2) infinite; }
@@ -359,16 +362,17 @@
       <div class="panel-group">
         <div class="panel" data-num="01 — UNGGAH">
           <h2>Unggah</h2>
-          <div class="radio-group" id="uploadCatGroup">
-            <label class="radio-opt active"><input type="radio" name="uploadcat" value="image" checked> Gambar</label>
-            <label class="radio-opt"><input type="radio" name="uploadcat" value="video"> Video</label>
+          <div class="field" style="margin-bottom:14px;">
+            <div class="radio-group" id="modeRadioGroup" style="margin-bottom:6px;">
+              <label class="radio-opt active"><input type="radio" name="videomode" value="gabung" checked> Gabung</label>
+              <label class="radio-opt"><input type="radio" name="videomode" value="frame"> Satu Frame</label>
+            </div>
+            <div class="note" id="modeHint">Gambar/video berikutnya menggantikan yang sebelumnya, dengan efek transisi di antaranya.</div>
           </div>
-          <input type="file" id="fileInput" accept="image/*,application/octet-stream" multiple style="display:none;">
-          <input type="file" id="videoFileInput" accept="video/*,application/octet-stream" multiple style="display:none;">
+          <input type="file" id="fileInput" accept="image/*,video/*,application/octet-stream" multiple style="display:none;">
           <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
-          <button class="btn-upload" id="btnPickVideos" style="display:none;">+ Pilih Video (bisa lebih dari satu)</button>
           <div class="thumbs" id="thumbs"></div>
-          <div class="note">Urutan gambar/video = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan. Berkas video ditandai ikon 🎬 dan diputar tanpa suara di dalam video hasil (pakai panel Audio untuk menambah suara).</div>
+          <div class="note">Bisa memilih gambar dan video sekaligus. Urutan gambar/video = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan. Berkas video ditandai ikon 🎬 dan diputar tanpa suara di dalam video hasil (pakai panel Audio untuk menambah suara).</div>
         </div>
 
         <div class="panel" data-num="02 — LATAR">
@@ -490,14 +494,6 @@
         <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
           <h2>Gerakan Kamera &amp; Transisi</h2>
           <div class="field">
-            <label>Mode Video</label>
-            <div class="radio-group" id="modeRadioGroup" style="margin-bottom:6px;">
-              <label class="radio-opt active"><input type="radio" name="videomode" value="gabung" checked> Gabung (Satu per Satu)</label>
-              <label class="radio-opt"><input type="radio" name="videomode" value="frame"> Satu Frame (Semua Tetap Tampil)</label>
-            </div>
-            <div class="note" id="modeHint">Gambar berikutnya menggantikan gambar sebelumnya, dengan efek transisi di antaranya.</div>
-          </div>
-          <div class="field">
             <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
             <select id="animType">
               <option value="none">Diam</option>
@@ -592,9 +588,9 @@
     <div>
       <div class="panel" data-num="PRATINJAU">
         <h2>Pratinjau</h2>
-        <p class="sub">Pilih gambar, lalu atur Ukuran / Posisi — hasilnya langsung terlihat di pratinjau, tanpa perlu render ulang animasi.</p>
+        <p class="sub">Pilih gambar/video, lalu atur Ukuran / Posisi — hasilnya langsung terlihat di pratinjau, tanpa perlu render ulang animasi.</p>
 
-        <div class="adjust-row-thumbs" id="adjustThumbs"></div>
+        <div class="adjust-filelist" id="adjustThumbs"></div>
 
         <div class="stage" id="stage">
           <div class="stage-placeholder" id="stagePlaceholder">Belum ada gambar. Unggah gambar di panel kiri untuk mulai.</div>
@@ -667,9 +663,7 @@
   }
 
   const fileInput = document.getElementById('fileInput');
-  const videoFileInput = document.getElementById('videoFileInput');
   const btnPickImages = document.getElementById('btnPickImages');
-  const btnPickVideos = document.getElementById('btnPickVideos');
   const thumbsEl = document.getElementById('thumbs');
   const btnRender = document.getElementById('btnRender');
   const stagePlaceholder = document.getElementById('stagePlaceholder');
@@ -699,88 +693,72 @@
     }
   });
 
-  // ---------- KATEGORI UNGGAH (GAMBAR / VIDEO) ----------
-  document.querySelectorAll('input[name="uploadcat"]').forEach(r => {
-    r.addEventListener('change', () => {
-      document.querySelectorAll('#uploadCatGroup .radio-opt').forEach(o => o.classList.remove('active'));
-      r.closest('.radio-opt').classList.add('active');
-      const isVideo = r.value === 'video';
-      btnPickImages.style.display = isVideo ? 'none' : '';
-      btnPickVideos.style.display = isVideo ? '' : 'none';
-    });
-  });
-
-  // ---------- IMAGE UPLOAD ----------
+  // ---------- UNGGAH GAMBAR & VIDEO (SATU TOMBOL, DUA JENIS BERKAS) ----------
   btnPickImages.addEventListener('click', () => fileInput.click());
   // Validasi tipe berkas manual (accept dialog dilonggarkan supaya Android tidak memaksa Photo Picker/cloud saja)
   function isImageFile(f){ return (f.type && f.type.startsWith('image/')) || /\.(jpe?g|png|gif|webp|bmp|heic|heif|avif|svg)$/i.test(f.name||''); }
   function isVideoFile(f){ return (f.type && f.type.startsWith('video/')) || /\.(mp4|mov|webm|mkv|avi|3gp|m4v)$/i.test(f.name||''); }
 
+  function addImageFile(f){
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
+    img.src = url;
+    state.images.push({type:'image', img, url, name:f.name||'gambar', userScale:1, userOffX:0, userOffY:0});
+  }
+
+  function addVideoFile(f){
+    const url = URL.createObjectURL(f);
+    const video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    const item = {type:'video', video, img:null, url:null, name:f.name||'video', userScale:1, userOffX:0, userOffY:0};
+    state.images.push(item);
+    video.addEventListener('loadedmetadata', () => {
+      // Perbaikan bug WebM: duration sering dilaporkan Infinity sampai kita "memaksa" browser
+      // menghitungnya dengan seek ke waktu sangat besar lalu kembali ke awal.
+      if (!isFinite(video.duration)) {
+        video.currentTime = 1e101;
+        video.addEventListener('timeupdate', function onFixDur(){
+          video.removeEventListener('timeupdate', onFixDur);
+          video.currentTime = Math.min(0.05, (isFinite(video.duration) ? video.duration : 1) / 2);
+        }, { once: true });
+      } else {
+        try { video.currentTime = Math.min(0.05, (video.duration||1)/2); } catch(err) {}
+      }
+    });
+    video.addEventListener('seeked', function onSeeked(){
+      const off = document.createElement('canvas');
+      off.width = video.videoWidth || 320;
+      off.height = video.videoHeight || 180;
+      const octx = off.getContext('2d');
+      try { octx.drawImage(video, 0, 0, off.width, off.height); } catch(err) {}
+      const posterUrl = off.toDataURL('image/jpeg', 0.85);
+      const poster = new Image();
+      poster.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
+      poster.src = posterUrl;
+      item.img = poster;
+      item.url = posterUrl;
+      video.removeEventListener('seeked', onSeeked);
+    }, { once: true });
+    video.load();
+  }
+
   fileInput.addEventListener('change', (e) => {
     const allFiles = Array.from(e.target.files || []);
-    const files = allFiles.filter(isImageFile);
-    if (files.length < allFiles.length) alert('Beberapa berkas dilewati karena bukan berformat gambar.');
-    files.forEach(f => {
-      const url = URL.createObjectURL(f);
-      const img = new Image();
-      img.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
-      img.src = url;
-      state.images.push({type:'image', img, url, name:f.name||'gambar', userScale:1, userOffX:0, userOffY:0});
+    const skipped = allFiles.length;
+    let kept = 0;
+    allFiles.forEach(f => {
+      if (isVideoFile(f)) { addVideoFile(f); kept++; }
+      else if (isImageFile(f)) { addImageFile(f); kept++; }
     });
+    if (kept < skipped) alert('Beberapa berkas dilewati karena bukan berformat gambar/video.');
     renderThumbs();
     updateRenderButton();
     renderAdjustThumbs();
     fileInput.value = '';
-  });
-
-  // ---------- VIDEO UPLOAD ----------
-  btnPickVideos.addEventListener('click', () => videoFileInput.click());
-  videoFileInput.addEventListener('change', (e) => {
-    const allFiles = Array.from(e.target.files || []);
-    const files = allFiles.filter(isVideoFile);
-    if (files.length < allFiles.length) alert('Beberapa berkas dilewati karena bukan berformat video.');
-    files.forEach(f => {
-      const url = URL.createObjectURL(f);
-      const video = document.createElement('video');
-      video.src = url;
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'auto';
-      const item = {type:'video', video, img:null, url:null, name:f.name||'video', userScale:1, userOffX:0, userOffY:0};
-      state.images.push(item);
-      video.addEventListener('loadedmetadata', () => {
-        // Perbaikan bug WebM: duration sering dilaporkan Infinity sampai kita "memaksa" browser
-        // menghitungnya dengan seek ke waktu sangat besar lalu kembali ke awal.
-        if (!isFinite(video.duration)) {
-          video.currentTime = 1e101;
-          video.addEventListener('timeupdate', function onFixDur(){
-            video.removeEventListener('timeupdate', onFixDur);
-            video.currentTime = Math.min(0.05, (isFinite(video.duration) ? video.duration : 1) / 2);
-          }, { once: true });
-        } else {
-          try { video.currentTime = Math.min(0.05, (video.duration||1)/2); } catch(err) {}
-        }
-      });
-      video.addEventListener('seeked', function onSeeked(){
-        const off = document.createElement('canvas');
-        off.width = video.videoWidth || 320;
-        off.height = video.videoHeight || 180;
-        const octx = off.getContext('2d');
-        try { octx.drawImage(video, 0, 0, off.width, off.height); } catch(err) {}
-        const posterUrl = off.toDataURL('image/jpeg', 0.85);
-        const poster = new Image();
-        poster.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
-        poster.src = posterUrl;
-        item.img = poster;
-        item.url = posterUrl;
-        video.removeEventListener('seeked', onSeeked);
-      }, { once: true });
-      video.load();
-    });
-    renderThumbs();
-    updateRenderButton();
-    renderAdjustThumbs();
-    videoFileInput.value = '';
   });
 
   function escapeHtml(s){
@@ -889,8 +867,8 @@
       const isFrame = r.value === 'frame';
       transField.style.display = isFrame ? 'none' : '';
       modeHint.textContent = isFrame
-        ? 'Tiap gambar tetap tampil di layar setelah muncul (tidak digantikan gambar berikutnya) — atur ukuran & posisi tiap gambar lewat panel Pratinjau di kanan supaya semuanya terlihat berdampingan. Kamera terus bergerak sampai akhir video.'
-        : 'Gambar berikutnya menggantikan gambar sebelumnya, dengan efek transisi di antaranya.';
+        ? 'Tiap gambar/video tetap tampil di layar setelah muncul (tidak digantikan yang berikutnya) — atur ukuran & posisi tiap item lewat panel Pratinjau di kanan supaya semuanya terlihat berdampingan. Kamera terus bergerak sampai akhir video.'
+        : 'Gambar/video berikutnya menggantikan yang sebelumnya, dengan efek transisi di antaranya.';
     });
   });
 
@@ -1034,11 +1012,9 @@
     adjustThumbsEl.innerHTML = '';
     state.images.forEach((item, i) => {
       const div = document.createElement('div');
-      div.className = 'thumb';
-      div.style.cursor = 'pointer';
-      div.style.borderColor = i === selectedImageIndex ? '#e8a33d' : '';
-      div.style.borderWidth = i === selectedImageIndex ? '2px' : '1px';
-      div.innerHTML = `${item.url ? `<img src="${item.url}">` : ''}<span class="idx">${i+1}</span>${item.type === 'video' ? '<span class="idx" style="left:auto; right:20px;">🎬</span>' : ''}`;
+      div.className = 'adjust-file-chip' + (i === selectedImageIndex ? ' selected' : '');
+      const label = item.name || (item.type === 'video' ? 'video' : 'gambar');
+      div.innerHTML = `<span class="idx">${i+1}.</span><span class="fname" title="${escapeHtml(label)}">${escapeHtml(label)}</span>${item.type === 'video' ? '<span class="tag">🎬</span>' : ''}`;
       div.addEventListener('click', () => {
         selectedImageIndex = i;
         renderAdjustThumbs();
