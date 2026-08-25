@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gambar ke Video</title>
+<style>
+  :root{
+    --bg: #14120f;
+    --panel: #1d1a16;
+    --panel-2: #262119;
+    --line: #3a332a;
+    --amber: #e8a33d;
+    --amber-dim: #a97a30;
+    --text: #ece6da;
+    --text-dim: #9a9184;
+    --danger: #c9564a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #241d12 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family: 'Courier New', ui-monospace, monospace;
+    min-height:100vh;
+  }
+  .wrap{max-width:1220px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{margin-bottom:26px;}
+  .eyebrow{
+    color:var(--amber-dim);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    margin:0 0 6px;
+  }
+  h1{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight:400;
+    font-size:34px;
+    margin:0 0 8px;
+    letter-spacing:.01em;
+  }
+  header p{color:var(--text-dim); margin:0; font-size:13.5px; line-height:1.5;}
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap:20px;
+  }
+  @media (max-width: 940px){ .grid{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:20px 20px 22px;
+    position:relative;
+  }
+  .panel + .panel{margin-top:18px;}
+  .panel::before{
+    content:attr(data-num);
+    position:absolute; top:-11px; left:16px;
+    background:var(--bg);
+    color:var(--amber-dim);
+    font-size:11px;
+    padding:0 8px;
+    letter-spacing:.12em;
+  }
+  .panel h2{
+    font-family: Georgia, serif;
+    font-weight:400;
+    font-size:16px;
+    margin:2px 0 4px;
+    color:var(--amber);
+  }
+  .panel .sub{color:var(--text-dim); font-size:12px; margin:0 0 14px; line-height:1.5;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .field{margin-bottom:14px;}
+  .field label{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim);
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  select, input[type="number"], input[type="text"]{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:8px 10px;
+    font-family:inherit;
+    font-size:13px;
+    border-radius:2px;
+    width:100%;
+  }
+  select:focus, input:focus, button:focus{outline:2px solid var(--amber-dim); outline-offset:1px;}
+  input[type="color"]{
+    -webkit-appearance:none; appearance:none;
+    width:44px; height:32px; border:1px solid var(--line); border-radius:2px; background:none; padding:2px;
+  }
+
+  .radio-group{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:12px;}
+  .radio-opt{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-dim); cursor:pointer;}
+  .radio-opt input{accent-color:var(--amber);}
+  .radio-opt.active{color:var(--text);}
+
+  .bg-sub{display:none;}
+  .bg-sub.show{display:block;}
+
+  button{ font-family:inherit; cursor:pointer; border-radius:2px; }
+  .btn-upload{
+    background:var(--panel-2);
+    border:1px dashed var(--line);
+    color:var(--text-dim);
+    padding:14px;
+    width:100%;
+    font-size:12.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+  .btn-upload:hover{border-color:var(--amber-dim); color:var(--text);}
+
+  .thumbs{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+  .adjust-row-thumbs{
+    display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .adjust-row-thumbs::-webkit-scrollbar{ height:6px; }
+  .adjust-row-thumbs::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+  .adjust-row-thumbs .thumb{ flex-shrink:0; }
+  .thumb{ position:relative; width:78px; height:78px; border:1px solid var(--line); overflow:hidden; border-radius:2px; background:#000; }
+  .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .thumb .idx{ position:absolute; top:2px; left:3px; font-size:10px; background:rgba(0,0,0,.6); padding:0 4px; color:var(--amber); }
+  .thumb .rm{ position:absolute; top:2px; right:2px; background:rgba(0,0,0,.65); color:var(--danger); border:none; width:18px; height:18px; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center; }
+  .thumb .mv{ position:absolute; bottom:2px; display:flex; width:100%; justify-content:center; gap:4px; }
+  .thumb .mv button{ background:rgba(0,0,0,.65); color:var(--text); border:none; width:16px; height:16px; font-size:10px; }
+
+  .main-btn{
+    width:100%;
+    background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+    color:#1a1408; border:none; font-weight:bold; font-size:14px;
+    letter-spacing:.06em; text-transform:uppercase; padding:14px; margin-top:6px;
+  }
+  .main-btn:disabled{ background:var(--line); color:var(--text-dim); cursor:not-allowed; }
+  .main-btn:not(:disabled):hover{filter:brightness(1.08);}
+
+  .stage{
+    background:#000; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    aspect-ratio: 16/9; overflow:hidden; position:relative;
+  }
+  .stage canvas, .stage video{max-width:100%; max-height:100%; display:block;}
+  .stage-placeholder{color:var(--text-dim); font-size:12.5px; text-align:center; padding:20px;}
+
+  .status{ font-size:12px; color:var(--text-dim); margin-top:10px; min-height:16px; }
+  .progress-track{ height:4px; background:var(--panel-2); border:1px solid var(--line); margin-top:8px; display:none; }
+  .progress-track.show{display:block;}
+  .progress-fill{height:100%; width:0%; background:var(--amber); transition:width .1s linear;}
+
+  .download-box{ margin-top:14px; display:none; border-top:1px solid var(--line); padding-top:14px; }
+  .download-box.show{display:block;}
+  .download-box a{
+    display:block; text-align:center; background:var(--panel-2); border:1px solid var(--amber-dim);
+    color:var(--amber); text-decoration:none; padding:12px; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+  }
+  .download-box a:hover{background:#332a1a;}
+  .note{font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5;}
+  .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .inline-three{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; align-items:end;}
+  .inline-three .field{margin-bottom:12px;}
+  .inline-three .field label{font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .inline-three input[type="range"]{width:100%;}
+
+  /* ---- Entrance animation picker ---- */
+  .anim-list{ display:flex; flex-direction:column; gap:0; border:1px solid var(--line); border-radius:2px; overflow:hidden; }
+  .anim-row{
+    display:grid;
+    grid-template-columns: 26px 52px 1fr;
+    align-items:center;
+    gap:12px;
+    padding:9px 10px;
+    background:var(--panel-2);
+  }
+  .anim-row:nth-child(odd){ background:#211d16; }
+  .anim-row input[type=checkbox]{ accent-color:var(--amber); width:16px; height:16px; }
+  .anim-row .label-txt{ font-size:12.5px; color:var(--text); }
+  .anim-row .label-txt b{ color:var(--amber); font-weight:normal; }
+  .anim-row .desc{ display:block; font-size:11px; color:var(--text-dim); margin-top:1px; }
+
+  .demo{
+    width:46px; height:34px; background:#0b0a08; border:1px solid var(--line);
+    border-radius:2px; position:relative; overflow:hidden; flex-shrink:0;
+  }
+  .demo-inner{
+    position:absolute; inset:0; margin:auto;
+    width:22px; height:22px;
+    background: linear-gradient(135deg, var(--amber), #6b3f14);
+    border-radius:2px;
+  }
+  /* Appear */
+  .demo-appear .demo-inner{ animation: dAppear 1.6s steps(1) infinite; }
+  @keyframes dAppear{ 0%,45%{opacity:0;} 46%,100%{opacity:1;} }
+  /* Fade */
+  .demo-fade .demo-inner{ animation: dFade 1.6s ease-in-out infinite; }
+  @keyframes dFade{ 0%{opacity:0;} 55%,100%{opacity:1;} }
+  /* Fly In (from left) */
+  .demo-flyin .demo-inner{ animation: dFly 1.6s cubic-bezier(.2,.8,.3,1) infinite; }
+  @keyframes dFly{ 0%{ transform:translateX(-40px); opacity:0;} 55%,100%{ transform:translateX(0); opacity:1;} }
+  /* Float In (from bottom, soft) */
+  .demo-floatin .demo-inner{ animation: dFloat 1.8s ease-out infinite; }
+  @keyframes dFloat{ 0%{ transform:translateY(18px); opacity:0;} 60%,100%{ transform:translateY(0); opacity:1;} }
+  /* Split */
+  .demo-split{ }
+  .demo-split .demo-inner{ display:none; }
+  .demo-split::before, .demo-split::after{
+    content:''; position:absolute; top:6px; width:11px; height:22px;
+    background:linear-gradient(135deg, var(--amber), #6b3f14);
+  }
+  .demo-split::before{ left:12px; animation: dSplitL 1.6s ease-in-out infinite; }
+  .demo-split::after{ right:12px; animation: dSplitR 1.6s ease-in-out infinite; }
+  @keyframes dSplitL{ 0%{ transform:translateX(-14px);} 55%,100%{ transform:translateX(0);} }
+  @keyframes dSplitR{ 0%{ transform:translateX(14px);} 55%,100%{ transform:translateX(0);} }
+  /* Wipe */
+  .demo-wipe .demo-inner{ animation: dWipe 1.6s ease-in-out infinite; clip-path: inset(0 100% 0 0); }
+  @keyframes dWipe{ 0%{ clip-path: inset(0 100% 0 0);} 60%,100%{ clip-path: inset(0 0 0 0);} }
+  /* Shape (circle reveal) */
+  .demo-shape .demo-inner{ animation: dShape 1.6s ease-in-out infinite; }
+  @keyframes dShape{ 0%{ clip-path: circle(0% at 50% 50%);} 60%,100%{ clip-path: circle(75% at 50% 50%);} }
+  /* Wheel (rotating wedge reveal) */
+  .demo-wheel .demo-inner{ animation: dWheel 1.8s linear infinite; }
+  @keyframes dWheel{
+    0%{ clip-path: polygon(50% 50%,50% 0,50% 0,50% 0); }
+    25%{ clip-path: polygon(50% 50%,50% 0,100% 0,100% 0); }
+    50%{ clip-path: polygon(50% 50%,50% 0,100% 0,100% 100%); }
+    75%{ clip-path: polygon(50% 50%,50% 0,100% 0,0 100%); }
+    100%{ clip-path: polygon(50% 50%,50% 0,100% 0,0 100%,0 0); }
+  }
+  /* Random Bars */
+  .demo-randombars .demo-inner{ display:none; }
+  .demo-randombars .bar{ position:absolute; top:6px; width:4px; height:22px; background:linear-gradient(135deg, var(--amber), #6b3f14); }
+  .demo-randombars .bar:nth-child(1){ left:9px; animation: dBar 1.6s steps(1) infinite; animation-delay:0s; }
+  .demo-randombars .bar:nth-child(2){ left:15px; animation: dBar 1.6s steps(1) infinite; animation-delay:.25s; }
+  .demo-randombars .bar:nth-child(3){ left:21px; animation: dBar 1.6s steps(1) infinite; animation-delay:.05s; }
+  .demo-randombars .bar:nth-child(4){ left:27px; animation: dBar 1.6s steps(1) infinite; animation-delay:.35s; }
+  .demo-randombars .bar:nth-child(5){ left:33px; animation: dBar 1.6s steps(1) infinite; animation-delay:.15s; }
+  @keyframes dBar{ 0%{opacity:0;} 30%,100%{opacity:1;} 100%{opacity:1;} }
+  /* Grow & Turn */
+  .demo-growturn .demo-inner{ animation: dGrowTurn 1.8s cubic-bezier(.2,.9,.3,1.2) infinite; }
+  @keyframes dGrowTurn{ 0%{ transform:scale(0) rotate(-120deg); opacity:0;} 65%,100%{ transform:scale(1) rotate(0deg); opacity:1;} }
+  /* Zoom */
+  .demo-zoom .demo-inner{ animation: dZoom 1.6s ease-out infinite; }
+  @keyframes dZoom{ 0%{ transform:scale(.1); opacity:0;} 60%,100%{ transform:scale(1); opacity:1;} }
+  /* Swivel */
+  .demo-swivel .demo-inner{ animation: dSwivel 1.7s ease-out infinite; }
+  @keyframes dSwivel{ 0%{ transform:scaleX(0) rotate(0deg);} 65%,100%{ transform:scaleX(1) rotate(360deg);} }
+  /* Bounce */
+  .demo-bounce .demo-inner{ animation: dBounce 1.8s cubic-bezier(.28,1.6,.4,1) infinite; }
+  @keyframes dBounce{ 0%{ transform:translateY(-26px); opacity:0;} 45%{ transform:translateY(0); opacity:1;} 60%{ transform:translateY(-8px);} 75%{ transform:translateY(0);} 88%{ transform:translateY(-3px);} 100%{ transform:translateY(0);} }
+
+  .anim-hint{
+    font-size:11px; color:var(--text-dim); margin-top:10px; line-height:1.5;
+    border-left:2px solid var(--amber-dim); padding-left:8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Studio Montase — Alat Lokal di Browser</p>
+    <h1>Gambar ke Video</h1>
+    <p>Susun beberapa gambar jadi satu video dengan animasi kemunculan, gerakan kamera, dan transisi — lengkap dengan latar warna, gradasi, atau gambar sendiri. Semua diproses di perangkatmu, tidak ada yang diunggah ke server.</p>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT: CONTROLS -->
+    <div>
+      <div class="panel" data-num="01 — GAMBAR">
+        <h2>Unggah Gambar</h2>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+        <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="note">Urutan gambar = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan.</div>
+      </div>
+
+      <div class="panel" data-num="02 — LATAR">
+        <h2>Latar Belakang</h2>
+        <div class="radio-group" id="bgRadioGroup">
+          <label class="radio-opt active"><input type="radio" name="bgmode" value="solid" checked> Warna Polos</label>
+          <label class="radio-opt"><input type="radio" name="bgmode" value="gradient"> Gradasi</label>
+          <label class="radio-opt"><input type="radio" name="bgmode" value="image"> Unggah Gambar</label>
+        </div>
+
+        <div class="bg-sub show" id="bgSolid">
+          <div class="field" style="max-width:120px;">
+            <label>Warna</label>
+            <input type="color" id="solidColor" value="#14120f">
+          </div>
+        </div>
+
+        <div class="bg-sub" id="bgGradient">
+          <div class="inline-two">
+            <div class="field">
+              <label>Warna 1</label>
+              <input type="color" id="gradColor1" value="#e8a33d">
+            </div>
+            <div class="field">
+              <label>Warna 2</label>
+              <input type="color" id="gradColor2" value="#14120f">
+            </div>
+          </div>
+          <div class="field">
+            <label>Arah Gradasi</label>
+            <select id="gradDir">
+              <option value="vertical">Atas ke Bawah</option>
+              <option value="horizontal">Kiri ke Kanan</option>
+              <option value="diagonal1">Diagonal ↘</option>
+              <option value="diagonal2">Diagonal ↙</option>
+              <option value="radial">Radial (Tengah ke Luar)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-sub" id="bgImage">
+          <input type="file" id="bgImageInput" accept="image/*" style="display:none;">
+          <button class="btn-upload" id="btnPickBg">+ Pilih Gambar Latar</button>
+          <div class="thumbs" id="bgThumb"></div>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+          <label>Mode Tampilan Gambar Utama</label>
+          <select id="fitMode">
+            <option value="contain">Pas / Contain (latar terlihat di sisi)</option>
+            <option value="cover">Penuh / Cover (gambar dipotong mengisi layar)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel" data-num="03 — ANIMASI KEMUNCULAN">
+        <h2>Animasi Kemunculan</h2>
+        <p class="sub">Pilih satu atau lebih. Kalau lebih dari satu dicentang, tiap gambar akan diberi animasi acak dari pilihan yang dicentang. Kotak kecil di kiri adalah contoh gerakannya.</p>
+        <div class="anim-list" id="entranceList">
+          <label class="anim-row"><input type="checkbox" value="appear" checked>
+            <div class="demo demo-appear"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Appear</b><span class="desc">Objek langsung muncul secara instan.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="fade">
+            <div class="demo demo-fade"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Fade</b><span class="desc">Objek muncul perlahan dari transparan menjadi jelas.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="flyin">
+            <div class="demo demo-flyin"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Fly In</b><span class="desc">Objek terbang masuk dari arah tertentu.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="floatin">
+            <div class="demo demo-floatin"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Float In</b><span class="desc">Objek melayang masuk dengan lembut.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="split">
+            <div class="demo demo-split"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Split</b><span class="desc">Objek muncul membelah dari tengah/samping.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="wipe">
+            <div class="demo demo-wipe"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Wipe</b><span class="desc">Objek muncul menyapu dari satu arah.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="shape">
+            <div class="demo demo-shape"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Shape</b><span class="desc">Objek muncul mengikuti pola bentuk geometri.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="wheel">
+            <div class="demo demo-wheel"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Wheel</b><span class="desc">Objek muncul berputar seperti jeruji roda.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="randombars">
+            <div class="demo demo-randombars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+            <span class="label-txt"><b>Random Bars</b><span class="desc">Objek muncul melalui garis-garis acak.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="growturn">
+            <div class="demo demo-growturn"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Grow &amp; Turn</b><span class="desc">Objek muncul sambil membesar dan berputar.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="zoom">
+            <div class="demo demo-zoom"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Zoom</b><span class="desc">Objek muncul dari kecil lalu membesar ke depan.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="swivel">
+            <div class="demo demo-swivel"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Swivel</b><span class="desc">Objek muncul sambil berputar pada porosnya.</span></span>
+          </label>
+          <label class="anim-row"><input type="checkbox" value="bounce">
+            <div class="demo demo-bounce"><div class="demo-inner"></div></div>
+            <span class="label-txt"><b>Bounce</b><span class="desc">Objek muncul dengan efek memantul.</span></span>
+          </label>
+        </div>
+        <div class="anim-hint">Contoh di kotak kecil berputar terus supaya kamu bisa lihat pola gerakannya sebelum dipilih.</div>
+      </div>
+
+      <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
+        <h2>Gerakan Kamera &amp; Transisi</h2>
+        <div class="field">
+          <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
+          <select id="animType">
+            <option value="none">Diam</option>
+            <option value="zoomin">Zoom In</option>
+            <option value="zoomout">Zoom Out</option>
+            <option value="panleft">Gerak ke Kiri</option>
+            <option value="panright">Gerak ke Kanan</option>
+            <option value="panup">Gerak ke Atas</option>
+            <option value="pandown">Gerak ke Bawah</option>
+            <option value="rotate">Putar Halus</option>
+            <option value="random">Acak (Beda Tiap Gambar)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Efek Transisi Antar Gambar</label>
+          <select id="transType">
+            <option value="none">Potong Langsung</option>
+            <option value="fade" selected>Fade (Menyatu)</option>
+            <option value="slide">Geser (Slide)</option>
+            <option value="wipe">Wipe (Sapuan)</option>
+          </select>
+        </div>
+        <div class="inline-two">
+          <div class="field">
+            <label>Durasi per Gambar (detik)</label>
+            <input type="number" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
+          </div>
+          <div class="field">
+            <label>Resolusi Video</label>
+            <select id="resSelect">
+              <option value="1280x720">1280x720 (Landscape)</option>
+              <option value="1920x1080">1920x1080 (Landscape HD)</option>
+              <option value="720x1280">720x1280 (Portrait/Story)</option>
+              <option value="1080x1080">1080x1080 (Persegi)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" data-num="05 — AUDIO">
+        <h2>Audio</h2>
+        <div class="radio-group" id="audioRadioGroup">
+          <label class="radio-opt active"><input type="radio" name="audiomode" value="none" checked> Tanpa Audio</label>
+          <label class="radio-opt"><input type="radio" name="audiomode" value="upload"> Unggah Audio</label>
+          <label class="radio-opt"><input type="radio" name="audiomode" value="tts"> Teks ke Suara (TTS)</label>
+        </div>
+
+        <div class="bg-sub" id="audioUploadSec">
+          <input type="file" id="audioFileInput" accept="audio/*" style="display:none;">
+          <button class="btn-upload" id="btnPickAudio">+ Pilih File Audio</button>
+          <div class="note" id="audioFileName">Belum ada file audio dipilih.</div>
+        </div>
+
+        <div class="bg-sub" id="audioTtsSec">
+          <div class="field">
+            <label>Teks yang Diucapkan</label>
+            <textarea id="ttsText" rows="3" placeholder="Tulis teks yang ingin diubah jadi suara..." style="width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:13px; padding:8px 10px; border-radius:2px; resize:vertical;"></textarea>
+          </div>
+          <div class="field">
+            <label>Jenis Suara</label>
+            <select id="ttsVoice"></select>
+          </div>
+          <div class="inline-two">
+            <div class="field">
+              <label>Pitch (<span id="ttsPitchVal">1.0</span>)</label>
+              <input type="range" id="ttsPitch" min="0" max="2" value="1" step="0.1">
+            </div>
+            <div class="field">
+              <label>Kecepatan / Rate (<span id="ttsRateVal">1.0</span>)</label>
+              <input type="range" id="ttsRate" min="0.5" max="2" value="1" step="0.1">
+            </div>
+          </div>
+          <div class="row" style="gap:8px;">
+            <button class="btn-upload" id="btnTtsPreview" style="width:auto; flex:1;">▶ Dengarkan</button>
+            <button class="btn-upload" id="btnTtsRecord" style="width:auto; flex:1;">⏺ Rekam Suara untuk Video</button>
+          </div>
+          <div class="note" id="ttsStatus" style="margin-top:8px;">Belum ada suara yang direkam untuk video.</div>
+          <div class="anim-hint">Peramban tidak mengizinkan suara TTS langsung diambil ke dalam video. Klik "Rekam Suara untuk Video" — jendela berbagi layar akan muncul, pilih <b>Tab Ini</b> lalu centang <b>Bagikan audio tab</b>, baru suaranya bisa masuk ke video.</div>
+        </div>
+      </div>
+
+      <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar Dulu</button>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div>
+      <div class="panel" data-num="PRATINJAU">
+        <h2>Pratinjau</h2>
+        <p class="sub">Pilih gambar, lalu geser Ukuran / Posisi X / Posisi Y — hasilnya langsung terlihat di pratinjau di bawah, tanpa perlu render ulang animasi.</p>
+
+        <div class="adjust-row-thumbs" id="adjustThumbs"></div>
+
+        <div class="inline-three">
+          <div class="field">
+            <label>Ukuran (<span id="scaleVal">100</span>%)</label>
+            <input type="range" id="scaleSlider" min="40" max="220" value="100" step="2">
+          </div>
+          <div class="field">
+            <label>Posisi X (<span id="posXVal">0</span>)</label>
+            <input type="range" id="posXSlider" min="-50" max="50" value="0" step="1">
+          </div>
+          <div class="field">
+            <label>Posisi Y (<span id="posYVal">0</span>)</label>
+            <input type="range" id="posYSlider" min="-50" max="50" value="0" step="1">
+          </div>
+        </div>
+        <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
+
+        <div class="stage" id="stage">
+          <div class="stage-placeholder" id="stagePlaceholder">Belum ada gambar. Unggah gambar di panel kiri untuk mulai.</div>
+          <canvas id="canvas" style="display:none;"></canvas>
+          <video id="resultVideo" controls style="display:none;"></video>
+        </div>
+        <div class="status" id="statusText"></div>
+        <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="download-box" id="downloadBox">
+          <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh Video</a>
+          <div class="note" id="formatNote"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const state = { images: [], bgImage: null, audioMode: 'none', audioFile: null, ttsBlob: null };
+  let isRendering = false;
+
+  const fileInput = document.getElementById('fileInput');
+  const btnPickImages = document.getElementById('btnPickImages');
+  const thumbsEl = document.getElementById('thumbs');
+  const btnRender = document.getElementById('btnRender');
+  const stagePlaceholder = document.getElementById('stagePlaceholder');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const resultVideo = document.getElementById('resultVideo');
+  const statusText = document.getElementById('statusText');
+  const progressTrack = document.getElementById('progressTrack');
+  const progressFill = document.getElementById('progressFill');
+  const downloadBox = document.getElementById('downloadBox');
+  const downloadLink = document.getElementById('downloadLink');
+  const formatNote = document.getElementById('formatNote');
+
+  // ---------- IMAGE UPLOAD ----------
+  btnPickImages.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => {
+      const url = URL.createObjectURL(f);
+      const img = new Image();
+      img.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
+      img.src = url;
+      state.images.push({img, url, userScale:1, userOffX:0, userOffY:0});
+    });
+    renderThumbs();
+    updateRenderButton();
+    renderAdjustThumbs();
+    fileInput.value = '';
+  });
+
+  function renderThumbs(){
+    thumbsEl.innerHTML = '';
+    state.images.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'thumb';
+      div.innerHTML = `
+        <img src="${item.url}">
+        <span class="idx">${i+1}</span>
+        <button class="rm" title="Hapus" data-i="${i}">×</button>
+        <div class="mv">
+          <button class="mvL" data-i="${i}" title="Pindah kiri">◀</button>
+          <button class="mvR" data-i="${i}" title="Pindah kanan">▶</button>
+        </div>
+      `;
+      thumbsEl.appendChild(div);
+    });
+    thumbsEl.querySelectorAll('.rm').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i, 10);
+        state.images.splice(i, 1);
+        renderThumbs();
+        updateRenderButton();
+        if (selectedImageIndex >= state.images.length) selectedImageIndex = Math.max(0, state.images.length - 1);
+        renderAdjustThumbs();
+        updateAdjustPreview();
+      });
+    });
+    thumbsEl.querySelectorAll('.mvL').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i, 10);
+        if (i > 0) {
+          [state.images[i-1], state.images[i]] = [state.images[i], state.images[i-1]];
+          if (selectedImageIndex === i) selectedImageIndex = i-1;
+          else if (selectedImageIndex === i-1) selectedImageIndex = i;
+          renderThumbs(); renderAdjustThumbs(); updateAdjustPreview();
+        }
+      });
+    });
+    thumbsEl.querySelectorAll('.mvR').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i, 10);
+        if (i < state.images.length - 1) {
+          [state.images[i+1], state.images[i]] = [state.images[i], state.images[i+1]];
+          if (selectedImageIndex === i) selectedImageIndex = i+1;
+          else if (selectedImageIndex === i+1) selectedImageIndex = i;
+          renderThumbs(); renderAdjustThumbs(); updateAdjustPreview();
+        }
+      });
+    });
+  }
+
+  function updateRenderButton(){
+    if (state.images.length > 0) { btnRender.disabled = false; btnRender.textContent = 'Buat Video'; }
+    else { btnRender.disabled = true; btnRender.textContent = 'Tambahkan Gambar Dulu'; }
+    syncSlidersToSelected();
+    updateAdjustPreview();
+  }
+
+  // ---------- BACKGROUND CONTROLS ----------
+  const bgRadios = document.querySelectorAll('input[name="bgmode"]');
+  const bgSolid = document.getElementById('bgSolid');
+  const bgGradient = document.getElementById('bgGradient');
+  const bgImageSec = document.getElementById('bgImage');
+  bgRadios.forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('.radio-opt').forEach(o => o.classList.remove('active'));
+      r.closest('.radio-opt').classList.add('active');
+      bgSolid.classList.toggle('show', r.value === 'solid');
+      bgGradient.classList.toggle('show', r.value === 'gradient');
+      bgImageSec.classList.toggle('show', r.value === 'image');
+    });
+  });
+
+  const bgImageInput = document.getElementById('bgImageInput');
+  const btnPickBg = document.getElementById('btnPickBg');
+  const bgThumb = document.getElementById('bgThumb');
+  btnPickBg.addEventListener('click', () => bgImageInput.click());
+  bgImageInput.addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => { state.bgImage = {img, url}; bgThumb.innerHTML = `<div class="thumb"><img src="${url}"></div>`; };
+    img.src = url;
+  });
+
+  function getBgMode(){ return document.querySelector('input[name="bgmode"]:checked').value; }
+
+  // ---------- AUDIO ----------
+  const audioUploadSec = document.getElementById('audioUploadSec');
+  const audioTtsSec = document.getElementById('audioTtsSec');
+  const audioFileInput = document.getElementById('audioFileInput');
+  const btnPickAudio = document.getElementById('btnPickAudio');
+  const audioFileName = document.getElementById('audioFileName');
+  const ttsText = document.getElementById('ttsText');
+  const ttsVoiceSelect = document.getElementById('ttsVoice');
+  const ttsPitch = document.getElementById('ttsPitch');
+  const ttsRate = document.getElementById('ttsRate');
+  const ttsPitchVal = document.getElementById('ttsPitchVal');
+  const ttsRateVal = document.getElementById('ttsRateVal');
+  const btnTtsPreview = document.getElementById('btnTtsPreview');
+  const btnTtsRecord = document.getElementById('btnTtsRecord');
+  const ttsStatus = document.getElementById('ttsStatus');
+
+  document.querySelectorAll('input[name="audiomode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('#audioRadioGroup .radio-opt').forEach(o => o.classList.remove('active'));
+      r.closest('.radio-opt').classList.add('active');
+      state.audioMode = r.value;
+      audioUploadSec.classList.toggle('show', r.value === 'upload');
+      audioTtsSec.classList.toggle('show', r.value === 'tts');
+    });
+  });
+
+  btnPickAudio.addEventListener('click', () => audioFileInput.click());
+  audioFileInput.addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    state.audioFile = f;
+    audioFileName.textContent = `Audio dipilih: ${f.name}`;
+  });
+
+  let voicesList = [];
+  function loadVoices(){
+    voicesList = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+    ttsVoiceSelect.innerHTML = '';
+    if (voicesList.length === 0) {
+      const opt = document.createElement('option');
+      opt.textContent = 'Suara tidak tersedia di peramban ini';
+      ttsVoiceSelect.appendChild(opt);
+      return;
+    }
+    voicesList.forEach((v, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${v.name} (${v.lang})`;
+      ttsVoiceSelect.appendChild(opt);
+    });
+    const idFallback = voicesList.findIndex(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+    if (idFallback >= 0) ttsVoiceSelect.value = idFallback;
+  }
+  if (window.speechSynthesis) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  ttsPitch.addEventListener('input', () => ttsPitchVal.textContent = parseFloat(ttsPitch.value).toFixed(1));
+  ttsRate.addEventListener('input', () => ttsRateVal.textContent = parseFloat(ttsRate.value).toFixed(1));
+
+  function buildUtterance(){
+    const u = new SpeechSynthesisUtterance(ttsText.value || '');
+    const v = voicesList[parseInt(ttsVoiceSelect.value, 10)];
+    if (v) u.voice = v;
+    u.pitch = parseFloat(ttsPitch.value);
+    u.rate = parseFloat(ttsRate.value);
+    return u;
+  }
+
+  btnTtsPreview.addEventListener('click', () => {
+    if (!window.speechSynthesis) { alert('Peramban ini tidak mendukung Text-to-Speech.'); return; }
+    if (!ttsText.value.trim()) { alert('Tulis teks dulu.'); return; }
+    speechSynthesis.cancel();
+    speechSynthesis.speak(buildUtterance());
+  });
+
+  btnTtsRecord.addEventListener('click', async () => {
+    if (!window.speechSynthesis) { alert('Peramban ini tidak mendukung Text-to-Speech.'); return; }
+    if (!ttsText.value.trim()) { alert('Tulis teks dulu.'); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      alert('Peramban ini tidak mendukung perekaman audio tab.'); return;
+    }
+    try {
+      ttsStatus.textContent = 'Menunggu izin berbagi tab...';
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const audioTracks = displayStream.getAudioTracks();
+      if (audioTracks.length === 0) {
+        displayStream.getTracks().forEach(t => t.stop());
+        ttsStatus.textContent = 'Tidak ada audio yang dibagikan. Pastikan centang "Bagikan audio tab" lalu coba lagi.';
+        return;
+      }
+      const audioOnlyStream = new MediaStream(audioTracks);
+      const chunks = [];
+      const rec = new MediaRecorder(audioOnlyStream);
+      rec.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      const stopped = new Promise(resolve => rec.onstop = resolve);
+      rec.start();
+      ttsStatus.textContent = 'Merekam suara TTS...';
+
+      speechSynthesis.cancel();
+      const u = buildUtterance();
+      const spoke = new Promise(resolve => {
+        u.onend = resolve;
+        u.onerror = resolve;
+      });
+      speechSynthesis.speak(u);
+      await spoke;
+      await new Promise(r => setTimeout(r, 300)); // buffer ekor suara
+      rec.stop();
+      await stopped;
+      displayStream.getTracks().forEach(t => t.stop());
+
+      state.ttsBlob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+      ttsStatus.textContent = 'Suara TTS siap dipakai ✓';
+    } catch (err) {
+      ttsStatus.textContent = 'Perekaman dibatalkan atau gagal: ' + err.message;
+    }
+  });
+
+  // ---------- UKURAN & POSISI (live di pratinjau utama) ----------
+  let selectedImageIndex = 0;
+  const adjustThumbsEl = document.getElementById('adjustThumbs');
+  const scaleSlider = document.getElementById('scaleSlider');
+  const posXSlider = document.getElementById('posXSlider');
+  const posYSlider = document.getElementById('posYSlider');
+  const scaleVal = document.getElementById('scaleVal');
+  const posXVal = document.getElementById('posXVal');
+  const posYVal = document.getElementById('posYVal');
+  const btnResetAdjust = document.getElementById('btnResetAdjust');
+
+  function renderAdjustThumbs(){
+    adjustThumbsEl.innerHTML = '';
+    state.images.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'thumb';
+      div.style.cursor = 'pointer';
+      div.style.borderColor = i === selectedImageIndex ? '#e8a33d' : '';
+      div.style.borderWidth = i === selectedImageIndex ? '2px' : '1px';
+      div.innerHTML = `<img src="${item.url}"><span class="idx">${i+1}</span>`;
+      div.addEventListener('click', () => {
+        selectedImageIndex = i;
+        renderAdjustThumbs();
+        syncSlidersToSelected();
+        updateAdjustPreview();
+      });
+      adjustThumbsEl.appendChild(div);
+    });
+  }
+
+  function syncSlidersToSelected(){
+    const item = state.images[selectedImageIndex];
+    if (!item) return;
+    const s = Math.round((item.userScale||1) * 100);
+    const x = Math.round((item.userOffX||0) * 100);
+    const y = Math.round((item.userOffY||0) * 100);
+    scaleSlider.value = s; scaleVal.textContent = s;
+    posXSlider.value = x; posXVal.textContent = x;
+    posYSlider.value = y; posYVal.textContent = y;
+  }
+
+  function updateAdjustPreview(){
+    // Jangan ganggu saat sedang merender video
+    if (isRendering) return;
+
+    if (state.images.length === 0) {
+      canvas.style.display = 'none';
+      resultVideo.style.display = 'none';
+      stagePlaceholder.style.display = 'block';
+      return;
+    }
+    stagePlaceholder.style.display = 'none';
+    resultVideo.style.display = 'none';
+    canvas.style.display = 'block';
+
+    const [W, H] = document.getElementById('resSelect').value.split('x').map(Number);
+    canvas.width = W; canvas.height = H;
+
+    drawBackground(W, H);
+
+    const item = state.images[selectedImageIndex];
+    if (!item) return;
+    const fitMode = document.getElementById('fitMode').value;
+    const { baseW: bw, baseH: bh } = computeBaseGeom(item.img, W, H, fitMode);
+    const drawW = bw * (item.userScale||1);
+    const drawH = bh * (item.userScale||1);
+    const cx = W/2 + (item.userOffX||0) * W;
+    const cy = H/2 + (item.userOffY||0) * H;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.drawImage(item.img, -drawW/2, -drawH/2, drawW, drawH);
+    ctx.restore();
+  }
+
+  scaleSlider.addEventListener('input', () => {
+    scaleVal.textContent = scaleSlider.value;
+    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userScale = parseInt(scaleSlider.value,10)/100;
+    updateAdjustPreview();
+  });
+  posXSlider.addEventListener('input', () => {
+    posXVal.textContent = posXSlider.value;
+    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userOffX = parseInt(posXSlider.value,10)/100;
+    updateAdjustPreview();
+  });
+  posYSlider.addEventListener('input', () => {
+    posYVal.textContent = posYSlider.value;
+    if (state.images[selectedImageIndex]) state.images[selectedImageIndex].userOffY = parseInt(posYSlider.value,10)/100;
+    updateAdjustPreview();
+  });
+  btnResetAdjust.addEventListener('click', () => {
+    if (!state.images[selectedImageIndex]) return;
+    state.images[selectedImageIndex].userScale = 1;
+    state.images[selectedImageIndex].userOffX = 0;
+    state.images[selectedImageIndex].userOffY = 0;
+    syncSlidersToSelected();
+    updateAdjustPreview();
+  });
+
+  document.getElementById('fitMode').addEventListener('change', updateAdjustPreview);
+  document.getElementById('resSelect').addEventListener('change', updateAdjustPreview);
+  document.getElementById('solidColor').addEventListener('input', updateAdjustPreview);
+  document.getElementById('gradColor1').addEventListener('input', updateAdjustPreview);
+  document.getElementById('gradColor2').addEventListener('input', updateAdjustPreview);
+  document.getElementById('gradDir').addEventListener('change', updateAdjustPreview);
+  bgRadiosAdjustHook();
+  function bgRadiosAdjustHook(){
+    document.querySelectorAll('input[name="bgmode"]').forEach(r => r.addEventListener('change', updateAdjustPreview));
+  }
+
+  // ---------- DRAWING HELPERS ----------
+  function drawBackground(w, h){
+    const mode = getBgMode();
+    if (mode === 'solid') {
+      ctx.fillStyle = document.getElementById('solidColor').value;
+      ctx.fillRect(0, 0, w, h);
+    } else if (mode === 'gradient') {
+      const c1 = document.getElementById('gradColor1').value;
+      const c2 = document.getElementById('gradColor2').value;
+      const dir = document.getElementById('gradDir').value;
+      let grad;
+      if (dir === 'vertical') grad = ctx.createLinearGradient(0,0,0,h);
+      else if (dir === 'horizontal') grad = ctx.createLinearGradient(0,0,w,0);
+      else if (dir === 'diagonal1') grad = ctx.createLinearGradient(0,0,w,h);
+      else if (dir === 'diagonal2') grad = ctx.createLinearGradient(w,0,0,h);
+      else if (dir === 'radial') grad = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.max(w,h)/1.3);
+      grad.addColorStop(0, c1); grad.addColorStop(1, c2);
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+    } else if (mode === 'image' && state.bgImage) {
+      drawCover(state.bgImage.img, 0, 0, w, h);
+    } else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h); }
+  }
+
+  function drawCover(img, x, y, w, h){
+    const ir = img.width / img.height, tr = w / h;
+    let sx, sy, sw, sh;
+    if (ir > tr) { sh = img.height; sw = sh * tr; sx = (img.width - sw) / 2; sy = 0; }
+    else { sw = img.width; sh = sw / tr; sx = 0; sy = (img.height - sh) / 2; }
+    ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  }
+
+  function computeBaseGeom(img, w, h, fitMode){
+    const ir = img.width / img.height, tr = w / h;
+    let baseW, baseH;
+    if (fitMode === 'cover') {
+      if (ir > tr) { baseH = h; baseW = baseH * ir; } else { baseW = w; baseH = baseW / ir; }
+    } else {
+      if (ir > tr) { baseW = w; baseH = baseW / ir; } else { baseH = h; baseW = baseH * ir; }
+    }
+    return { baseW, baseH };
+  }
+
+  // ---------- EASING ----------
+  function easeInOutQuad(p){ return p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2; }
+  function easeOutCubic(p){ return 1 - Math.pow(1-p, 3); }
+  function easeOutBack(p){ const c1=1.70158, c3=c1+1; return 1 + c3*Math.pow(p-1,3) + c1*Math.pow(p-1,2); }
+  function easeOutBounce(p){
+    const n1=7.5625, d1=2.75;
+    if (p < 1/d1) return n1*p*p;
+    else if (p < 2/d1) return n1*(p-=1.5/d1)*p + .75;
+    else if (p < 2.5/d1) return n1*(p-=2.25/d1)*p + .9375;
+    else return n1*(p-=2.625/d1)*p + .984375;
+  }
+
+  const EXTRA = 1.28; // headroom for camera pan/zoom
+
+  function getCameraTransform(type, p){
+    const ep = easeInOutQuad(p);
+    switch(type){
+      case 'zoomin': return { scale: 1 + (EXTRA-1)*ep, offX:0, offY:0, rot:0 };
+      case 'zoomout': return { scale: EXTRA - (EXTRA-1)*ep, offX:0, offY:0, rot:0 };
+      case 'panleft': { const m=(EXTRA-1)/2; return { scale:EXTRA, offX: m - m*2*ep, offY:0, rot:0 }; }
+      case 'panright': { const m=(EXTRA-1)/2; return { scale:EXTRA, offX: -m + m*2*ep, offY:0, rot:0 }; }
+      case 'panup': { const m=(EXTRA-1)/2; return { scale:EXTRA, offX:0, offY: m - m*2*ep, rot:0 }; }
+      case 'pandown': { const m=(EXTRA-1)/2; return { scale:EXTRA, offX:0, offY: -m + m*2*ep, rot:0 }; }
+      case 'rotate': return { scale:EXTRA, offX:0, offY:0, rot: -0.045 + 0.09*ep };
+      case 'none': default: return { scale:1, offX:0, offY:0, rot:0 };
+    }
+  }
+
+  // ---------- ENTRANCE ANIMATIONS ----------
+  // Draws imgObj at target geometry (cx,cy,drawW,drawH,rot) with an entrance effect at progress ep (0..1, raw/unequal per type).
+  function drawEntranceImage(img, type, ep, cx, cy, drawW, drawH, rot, barSeeds, outerAlpha, W, H){
+    ep = Math.max(0, Math.min(1, ep));
+    ctx.save();
+
+    function plain(alpha){
+      ctx.globalAlpha = alpha * outerAlpha;
+      ctx.translate(cx, cy); ctx.rotate(rot);
+      ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+    }
+    function transformed(px, py, scale, rotation, alpha){
+      ctx.globalAlpha = alpha * outerAlpha;
+      ctx.translate(px, py); ctx.rotate(rotation); ctx.scale(Math.max(0.001,scale), Math.max(0.001,scale));
+      ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+    }
+
+    switch(type){
+      case 'fade': plain(ep); break;
+
+      case 'flyin': {
+        const e = easeOutCubic(ep);
+        const dist = (1-e) * (drawW*0.7 + 120);
+        transformed(cx - dist, cy, 1, rot, Math.min(1, ep*1.6));
+        break;
+      }
+      case 'floatin': {
+        const e = easeOutCubic(ep);
+        const dist = (1-e) * H * 0.3;
+        transformed(cx, cy + dist, 1, rot, Math.min(1, ep*1.4));
+        break;
+      }
+      case 'split': {
+        ctx.globalAlpha = outerAlpha;
+        const off = (1-easeInOutQuad(ep)) * (drawW/2 + 20);
+        ctx.save(); ctx.beginPath(); ctx.rect(cx-drawW/2, cy-drawH/2, drawW/2, drawH); ctx.clip();
+        ctx.translate(cx - off, cy); ctx.rotate(rot);
+        ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+        ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(cx, cy-drawH/2, drawW/2, drawH); ctx.clip();
+        ctx.translate(cx + off, cy); ctx.rotate(rot);
+        ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+        ctx.restore();
+        break;
+      }
+      case 'wipe': {
+        ctx.beginPath(); ctx.rect(cx-drawW/2, cy-drawH/2, drawW*ep, drawH); ctx.clip();
+        plain(1);
+        break;
+      }
+      case 'shape': {
+        const maxR = Math.hypot(drawW, drawH)/2;
+        ctx.beginPath(); ctx.arc(cx, cy, maxR*easeInOutQuad(ep), 0, Math.PI*2); ctx.clip();
+        plain(1);
+        break;
+      }
+      case 'wheel': {
+        const maxR = Math.hypot(drawW, drawH);
+        const ang = Math.PI*2*ep;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, maxR, -Math.PI/2, -Math.PI/2 + ang);
+        ctx.closePath();
+        ctx.clip();
+        plain(1);
+        break;
+      }
+      case 'randombars': {
+        const bars = barSeeds.length;
+        const barW = drawW / bars;
+        ctx.globalAlpha = outerAlpha;
+        for (let i=0;i<bars;i++){
+          const thresh = barSeeds[i];
+          const bp = Math.max(0, Math.min(1, (ep - thresh) / (0.55)));
+          if (bp <= 0) continue;
+          const bh = drawH * bp;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(cx - drawW/2 + i*barW, cy - bh/2, barW+0.5, bh);
+          ctx.clip();
+          ctx.translate(cx, cy); ctx.rotate(rot);
+          ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+          ctx.restore();
+        }
+        break;
+      }
+      case 'growturn': {
+        const e = easeOutBack(ep);
+        transformed(cx, cy, e, rot + (1-ep)*0.9, Math.min(1, ep*1.6));
+        break;
+      }
+      case 'zoom': {
+        const e = easeOutCubic(ep);
+        transformed(cx, cy, Math.max(0.05, e), rot, Math.min(1, ep*1.8));
+        break;
+      }
+      case 'swivel': {
+        const e = easeOutCubic(ep);
+        ctx.globalAlpha = outerAlpha;
+        ctx.translate(cx, cy); ctx.rotate(rot); ctx.scale(Math.max(0.02, e), 1);
+        ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+        break;
+      }
+      case 'bounce': {
+        const e = easeOutBounce(ep);
+        const dist = (1-e) * H * 0.5;
+        transformed(cx, cy - dist, 1, rot, Math.min(1, ep*3));
+        break;
+      }
+      case 'appear': default: plain(1); break;
+    }
+    ctx.restore();
+  }
+
+  // ---------- RENDER (VIDEO EXPORT) ----------
+  let assignedCam = [];
+  let assignedEntrance = [];
+  let assignedBarSeeds = [];
+
+  function pickMimeType(){
+    const candidates = [
+      'video/mp4;codecs=avc1', 'video/mp4',
+      'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'
+    ];
+    for (const c of candidates) { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c)) return c; }
+    return '';
+  }
+
+  btnRender.addEventListener('click', async () => {
+    if (state.images.length === 0) return;
+    isRendering = true;
+
+    const [W, H] = document.getElementById('resSelect').value.split('x').map(Number);
+    canvas.width = W; canvas.height = H;
+    canvas.style.display = 'block';
+    resultVideo.style.display = 'none';
+    stagePlaceholder.style.display = 'none';
+    downloadBox.classList.remove('show');
+
+    const durPerImage = Math.max(1.5, parseFloat(document.getElementById('durPerImage').value) || 3.5);
+    const camType = document.getElementById('animType').value;
+    const transType = document.getElementById('transType').value;
+    const fitMode = document.getElementById('fitMode').value;
+    const fps = 30;
+
+    let checkedEntrance = Array.from(document.querySelectorAll('#entranceList input[type=checkbox]:checked')).map(cb => cb.value);
+    if (checkedEntrance.length === 0) checkedEntrance = ['appear'];
+
+    const camOptions = ['zoomin','zoomout','panleft','panright','panup','pandown','rotate'];
+    const n = state.images.length;
+
+    assignedCam = state.images.map(() => camType === 'random' ? camOptions[Math.floor(Math.random()*camOptions.length)] : camType);
+    assignedEntrance = state.images.map(() => checkedEntrance[Math.floor(Math.random()*checkedEntrance.length)]);
+    assignedBarSeeds = state.images.map(() => Array.from({length:10}, () => Math.random()*0.45));
+
+    const totalDuration = n * durPerImage;
+    const transDuration = transType === 'none' ? 0 : Math.min(0.8, durPerImage * 0.3);
+    const entranceDur = Math.min(1.1, durPerImage * 0.32);
+
+    btnRender.disabled = true;
+    btnRender.textContent = 'Merender...';
+    progressTrack.classList.add('show');
+    statusText.textContent = 'Menyiapkan perekaman...';
+
+    const stream = canvas.captureStream(fps);
+    const mimeType = pickMimeType();
+    let recorder;
+    try {
+      recorder = mimeType ? new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6_000_000 })
+                           : new MediaRecorder(stream, { videoBitsPerSecond: 6_000_000 });
+    } catch(err) { recorder = new MediaRecorder(stream); }
+    const actualMime = recorder.mimeType || mimeType || 'video/webm';
+    const isMp4 = actualMime.includes('mp4');
+
+    const chunks = [];
+    recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+    const finished = new Promise(resolve => { recorder.onstop = () => resolve(); });
+
+    function drawSegmentFrame(k, lt, alphaMultiplier, slideOffsetPx){
+      const imgObj = state.images[k];
+      const cType = assignedCam[k];
+      const eType = assignedEntrance[k];
+      const barSeeds = assignedBarSeeds[k];
+      const camSpan = Math.max(0.001, durPerImage - entranceDur);
+      const camP = Math.max(0, Math.min(1, (lt - entranceDur) / camSpan));
+      let { baseW, baseH } = computeBaseGeom(imgObj.img, W, H, fitMode);
+      baseW *= (imgObj.userScale||1); baseH *= (imgObj.userScale||1);
+      const camT = getCameraTransform(cType, camP);
+      const drawW = baseW * camT.scale, drawH = baseH * camT.scale;
+      const cx = W/2 + camT.offX * W + (imgObj.userOffX||0) * W + (slideOffsetPx||0);
+      const cy = H/2 + camT.offY * H + (imgObj.userOffY||0) * H;
+      const rot = camT.rot;
+
+      if (lt < entranceDur && eType !== 'appear') {
+        const ep = lt / entranceDur;
+        drawEntranceImage(imgObj.img, eType, ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+      } else {
+        ctx.save();
+        ctx.globalAlpha = alphaMultiplier;
+        ctx.translate(cx, cy); ctx.rotate(rot);
+        ctx.drawImage(imgObj.img, -drawW/2, -drawH/2, drawW, drawH);
+        ctx.restore();
+      }
+    }
+
+    recorder.start();
+    const startTime = performance.now();
+
+    function frame(){
+      const now = performance.now();
+      const elapsed = (now - startTime) / 1000;
+      const t = Math.min(elapsed, totalDuration);
+
+      drawBackground(W, H);
+
+      const idxFloat = t / durPerImage;
+      let k = Math.min(Math.floor(idxFloat), n - 1);
+      let lt = t - k * durPerImage;
+
+      const inTransitionWindow = transType !== 'none' && k < n - 1 && lt > (durPerImage - transDuration);
+
+      if (inTransitionWindow) {
+        const bp = (lt - (durPerImage - transDuration)) / transDuration;
+        const nextLt = bp * transDuration;
+
+        if (transType === 'fade') {
+          drawSegmentFrame(k, lt, 1, 0);
+          drawSegmentFrame(k+1, nextLt, bp, 0);
+        } else if (transType === 'slide') {
+          drawSegmentFrame(k, lt, 1, -bp * W);
+          drawSegmentFrame(k+1, nextLt, 1, (1-bp) * W);
+        } else if (transType === 'wipe') {
+          drawSegmentFrame(k, lt, 1, 0);
+          ctx.save();
+          ctx.beginPath(); ctx.rect(0, 0, W * bp, H); ctx.clip();
+          drawSegmentFrame(k+1, nextLt, 1, 0);
+          ctx.restore();
+        }
+      } else {
+        drawSegmentFrame(k, lt, 1, 0);
+      }
+
+      const pct = Math.min(100, Math.round((elapsed / totalDuration) * 100));
+      progressFill.style.width = pct + '%';
+      statusText.textContent = `Merender video... ${pct}% (${elapsed.toFixed(1)}s / ${totalDuration.toFixed(1)}s)`;
+
+      if (elapsed < totalDuration) requestAnimationFrame(frame);
+      else setTimeout(() => recorder.stop(), 150);
+    }
+    requestAnimationFrame(frame);
+
+    await finished;
+
+    const blob = new Blob(chunks, { type: actualMime.split(';')[0] });
+    const url = URL.createObjectURL(blob);
+
+    resultVideo.src = url;
+    resultVideo.style.display = 'block';
+    canvas.style.display = 'none';
+
+    const ext = isMp4 ? 'mp4' : 'webm';
+    downloadLink.href = url;
+    downloadLink.download = `video-gambar.${ext}`;
+    downloadBox.classList.add('show');
+
+    formatNote.textContent = isMp4
+      ? 'Video dibuat dalam format MP4.'
+      : 'Browser ini merekam dalam format WebM (MP4 langsung tidak didukung). File WebM tetap bisa diputar di sebagian besar pemutar video, atau dikonversi ke MP4 memakai alat konversi lain.';
+
+    statusText.textContent = 'Selesai!';
+    progressTrack.classList.remove('show');
+    btnRender.disabled = false;
+    btnRender.textContent = 'Buat Video Lagi';
+    isRendering = false;
+  });
+
+})();
+</script>
+</body>
+</html>
