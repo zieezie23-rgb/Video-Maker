@@ -1159,6 +1159,17 @@
     } else { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h); }
   }
 
+  function drawWatermark(w, h){
+    ctx.save();
+    ctx.globalAlpha = 0.62;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${Math.max(16, Math.round(w * 0.025))}px Arial`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText("zie's", w - 24, h - 20);
+    ctx.restore();
+  }
+
   function drawCover(img, x, y, w, h){
     const ir = img.width / img.height, tr = w / h;
     let sx, sy, sw, sh;
@@ -1670,6 +1681,7 @@
       const t = Math.min(elapsed, totalDuration);
 
       drawBackground(W, H);
+      drawWatermark(W, H);
 
       // Gerakan kamera global atas seluruh scene, dari awal sampai akhir video.
       const camP = Math.max(0, Math.min(1, t / totalDuration));
@@ -1705,6 +1717,7 @@
       const t = Math.min(elapsed, totalDuration);
 
       drawBackground(W, H);
+      drawWatermark(W, H);
 
       const k = segmentIndexForTime(t);
       const lt = t - starts[k];
