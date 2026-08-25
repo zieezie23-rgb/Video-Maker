@@ -461,6 +461,14 @@
         <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
           <h2>Gerakan Kamera &amp; Transisi</h2>
           <div class="field">
+            <label>Mode Video</label>
+            <div class="radio-group" id="modeRadioGroup" style="margin-bottom:6px;">
+              <label class="radio-opt active"><input type="radio" name="videomode" value="gabung" checked> Gabung (Satu per Satu)</label>
+              <label class="radio-opt"><input type="radio" name="videomode" value="frame"> Satu Frame (Semua Tetap Tampil)</label>
+            </div>
+            <div class="note" id="modeHint">Gambar berikutnya menggantikan gambar sebelumnya, dengan efek transisi di antaranya.</div>
+          </div>
+          <div class="field">
             <label>Gerakan Kamera Selama Gambar Tampil (Ken Burns)</label>
             <select id="animType">
               <option value="none">Diam</option>
@@ -474,7 +482,7 @@
               <option value="random">Acak (Beda Tiap Gambar)</option>
             </select>
           </div>
-          <div class="field">
+          <div class="field" id="transField">
             <label>Efek Transisi Antar Gambar</label>
             <select id="transType">
               <option value="none">Potong Langsung</option>
@@ -484,7 +492,7 @@
             </select>
           </div>
           <div class="field">
-            <label>Durasi per Gambar (detik)</label>
+            <label>Durasi Tiap Gambar Muncul (detik)</label>
             <input type="number" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
           </div>
           <div class="field">
@@ -540,8 +548,6 @@
           </div>
         </div>
       </div>
-
-      <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar Dulu</button>
     </div>
 
     <!-- RIGHT: PREVIEW -->
@@ -583,6 +589,8 @@
           </div>
         </div>
         <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
+
+        <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar Dulu</button>
 
         <div class="status" id="statusText"></div>
         <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
@@ -738,6 +746,22 @@
   });
 
   function getBgMode(){ return document.querySelector('input[name="bgmode"]:checked').value; }
+
+  // ---------- MODE VIDEO (GABUNG / SATU FRAME) ----------
+  const transField = document.getElementById('transField');
+  const modeHint = document.getElementById('modeHint');
+  function getVideoMode(){ return document.querySelector('input[name="videomode"]:checked').value; }
+  document.querySelectorAll('input[name="videomode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('#modeRadioGroup .radio-opt').forEach(o => o.classList.remove('active'));
+      r.closest('.radio-opt').classList.add('active');
+      const isFrame = r.value === 'frame';
+      transField.style.display = isFrame ? 'none' : '';
+      modeHint.textContent = isFrame
+        ? 'Tiap gambar tetap tampil di layar setelah muncul (tidak digantikan gambar berikutnya) — atur ukuran & posisi tiap gambar lewat panel Pratinjau di kanan supaya semuanya terlihat berdampingan. Kamera terus bergerak sampai akhir video.'
+        : 'Gambar berikutnya menggantikan gambar sebelumnya, dengan efek transisi di antaranya.';
+    });
+  });
 
   // ---------- AUDIO ----------
   const audioUploadSec = document.getElementById('audioUploadSec');
@@ -1325,6 +1349,7 @@
     const camType = document.getElementById('animType').value;
     const transType = document.getElementById('transType').value;
     const fitMode = document.getElementById('fitMode').value;
+    const videoMode = getVideoMode(); // 'gabung' | 'frame'
     const fps = 30;
 
     let checkedEntrance = Array.from(document.querySelectorAll('#entranceList input[type=checkbox]:checked')).map(cb => cb.value);
@@ -1393,9 +1418,70 @@
       }
     }
 
-    recorder.start();
-    const startTime = performance.now();
+    // ---- MODE "SATU FRAME": tiap gambar muncul lalu tetap di posisinya (tidak tertimpa),
+    // kamera bergerak sebagai satu kesatuan atas seluruh scene sampai akhir video.
+    function drawFrameModeImage(k, lt){
+      const imgObj = state.images[k];
+      const eType = assignedEntrance[k];
+      const barSeeds = assignedBarSeeds[k];
+      let { baseW, baseH } = computeBaseGeom(imgObj.img, W, H, fitMode);
+      baseW *= (imgObj.userScale||1); baseH *= (imgObj.userScale||1);
+      const cx = W/2 + (imgObj.userOffX||0) * W;
+      const cy = H/2 + (imgObj.userOffY||0) * H;
+      const rot = 0;
 
+      const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
+      if (lt < entranceDur && !isJustAppear) {
+        const ep = lt / entranceDur;
+        if (eType.length === 1) {
+          drawEntranceImage(imgObj.img, eType[0], ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
+        } else {
+          drawEntranceImageCombined(imgObj.img, eType, ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
+        }
+      } else {
+        ctx.save();
+        ctx.globalAlpha = 1;
+        ctx.translate(cx, cy); ctx.rotate(rot);
+        ctx.drawImage(imgObj.img, -baseW/2, -baseH/2, baseW, baseH);
+        ctx.restore();
+      }
+    }
+
+    function frameCombinedMode(){
+      const now = performance.now();
+      const elapsed = (now - startTime) / 1000;
+      const t = Math.min(elapsed, totalDuration);
+
+      drawBackground(W, H);
+
+      // Gerakan kamera global atas seluruh scene, dari awal sampai akhir video.
+      const camP = Math.max(0, Math.min(1, t / totalDuration));
+      const camType0 = assignedCam[0] || camType;
+      const camT = getCameraTransform(camType0, camP);
+
+      ctx.save();
+      ctx.translate(W/2 + camT.offX * W, H/2 + camT.offY * H);
+      ctx.rotate(camT.rot);
+      ctx.scale(Math.max(0.001, camT.scale), Math.max(0.001, camT.scale));
+      ctx.translate(-W/2, -H/2);
+
+      const idxFloat = t / durPerImage;
+      const kMax = Math.min(Math.floor(idxFloat), n - 1);
+      for (let k = 0; k <= kMax; k++) {
+        const lt = (k === kMax) ? (t - k * durPerImage) : durPerImage;
+        drawFrameModeImage(k, lt);
+      }
+      ctx.restore();
+
+      const pct = Math.min(100, Math.round((elapsed / totalDuration) * 100));
+      progressFill.style.width = pct + '%';
+      statusText.textContent = `Merender video... ${pct}% (${elapsed.toFixed(1)}s / ${totalDuration.toFixed(1)}s)`;
+
+      if (elapsed < totalDuration) requestAnimationFrame(frameCombinedMode);
+      else setTimeout(() => recorder.stop(), 150);
+    }
+
+    // ---- MODE "GABUNG": gambar berikutnya menggantikan gambar sebelumnya (perilaku semula).
     function frame(){
       const now = performance.now();
       const elapsed = (now - startTime) / 1000;
@@ -1437,7 +1523,10 @@
       if (elapsed < totalDuration) requestAnimationFrame(frame);
       else setTimeout(() => recorder.stop(), 150);
     }
-    requestAnimationFrame(frame);
+
+    recorder.start();
+    const startTime = performance.now();
+    requestAnimationFrame(videoMode === 'frame' ? frameCombinedMode : frame);
 
     await finished;
 
