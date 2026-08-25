@@ -130,7 +130,18 @@
   }
   .btn-upload:hover{border-color:var(--amber-dim); color:var(--text);}
 
-  .thumbs{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
+  .thumbs{display:flex; flex-direction:column; gap:6px; margin-top:12px;}
+  .filerow{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:2px;
+    padding:8px 10px; font-size:12px; color:var(--text);
+  }
+  .filerow .idx{ color:var(--amber); flex-shrink:0; }
+  .filerow .fname{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .filerow .tag{ flex-shrink:0; color:var(--text-dim); font-size:11px; }
+  .filerow .mv{ display:flex; gap:4px; flex-shrink:0; }
+  .filerow .mv button{ background:var(--panel); color:var(--text); border:1px solid var(--line); width:20px; height:20px; font-size:11px; }
+  .filerow .rm{ flex-shrink:0; background:var(--panel); color:var(--danger); border:1px solid var(--line); width:20px; height:20px; font-size:12px; line-height:1; display:flex; align-items:center; justify-content:center; }
   .adjust-row-thumbs{
     display:flex; flex-wrap:nowrap; gap:8px; overflow-x:auto;
     padding-bottom:4px;
@@ -512,6 +523,10 @@
           <div class="field">
             <label>Durasi Tiap Gambar Muncul (detik)</label>
             <input type="number" id="durPerImage" value="3.5" min="1.5" max="15" step="0.5">
+            <div class="note" style="margin-top:8px; display:flex; align-items:flex-start; gap:6px;">
+              <input type="checkbox" id="followVideoDur" style="margin-top:2px; accent-color:var(--amber);">
+              <label for="followVideoDur" style="text-transform:none; letter-spacing:normal; font-size:11.5px; color:var(--text-dim); cursor:pointer;">Untuk berkas video, ikuti durasi asli video tersebut (video tidak dipotong/terpotong). Durasi di atas tetap dipakai untuk gambar diam.</label>
+            </div>
           </div>
           <div class="field">
             <label>Resolusi Video</label>
@@ -688,7 +703,7 @@
       const img = new Image();
       img.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
       img.src = url;
-      state.images.push({type:'image', img, url, userScale:1, userOffX:0, userOffY:0});
+      state.images.push({type:'image', img, url, name:f.name||'gambar', userScale:1, userOffX:0, userOffY:0});
     });
     renderThumbs();
     updateRenderButton();
@@ -709,7 +724,7 @@
       video.muted = true;
       video.playsInline = true;
       video.preload = 'auto';
-      const item = {type:'video', video, img:null, url:null, userScale:1, userOffX:0, userOffY:0};
+      const item = {type:'video', video, img:null, url:null, name:f.name||'video', userScale:1, userOffX:0, userOffY:0};
       state.images.push(item);
       video.addEventListener('loadedmetadata', () => {
         // Ambil frame pertama sebagai poster/thumbnail lewat canvas offscreen
@@ -737,21 +752,23 @@
     videoFileInput.value = '';
   });
 
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
   function renderThumbs(){
     thumbsEl.innerHTML = '';
     state.images.forEach((item, i) => {
       const div = document.createElement('div');
-      div.className = 'thumb';
-      const thumbSrc = item.url || '';
+      div.className = 'filerow';
       div.innerHTML = `
-        ${thumbSrc ? `<img src="${thumbSrc}">` : ''}
-        <span class="idx">${i+1}</span>
-        ${item.type === 'video' ? '<span class="idx" style="left:auto; right:20px;">🎬</span>' : ''}
-        <button class="rm" title="Hapus" data-i="${i}">×</button>
+        <span class="idx">${i+1}.</span>
+        <span class="fname" title="${escapeHtml(item.name||'')}">${escapeHtml(item.name||(item.type==='video'?'video':'gambar'))}</span>
+        ${item.type === 'video' ? '<span class="tag">🎬 video</span>' : ''}
         <div class="mv">
           <button class="mvL" data-i="${i}" title="Pindah kiri">◀</button>
           <button class="mvR" data-i="${i}" title="Pindah kanan">▶</button>
         </div>
+        <button class="rm" title="Hapus" data-i="${i}">×</button>
       `;
       thumbsEl.appendChild(div);
     });
@@ -824,7 +841,7 @@
     if (!isImageFile(f)) { alert('Berkas yang dipilih bukan berformat gambar.'); bgImageInput.value=''; return; }
     const url = URL.createObjectURL(f);
     const img = new Image();
-    img.onload = () => { state.bgImage = {img, url}; bgThumb.innerHTML = `<div class="thumb"><img src="${url}"></div>`; };
+    img.onload = () => { state.bgImage = {img, url}; bgThumb.innerHTML = `<div class="filerow"><span class="fname" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span></div>`; };
     img.src = url;
   });
 
@@ -1448,9 +1465,22 @@
     assignedEntrance = state.images.map(() => checkedEntrance.slice());
     assignedBarSeeds = state.images.map(() => Array.from({length:10}, () => Math.random()*0.45));
 
-    const totalDuration = n * durPerImage;
-    const transDuration = transType === 'none' ? 0 : Math.min(0.8, durPerImage * 0.3);
-    const entranceDur = Math.min(1.1, durPerImage * 0.32);
+    const followVideoDur = document.getElementById('followVideoDur').checked;
+    const itemDurations = state.images.map(item => {
+      if (followVideoDur && item.type === 'video' && item.video && item.video.duration && isFinite(item.video.duration)) {
+        return Math.max(0.3, item.video.duration);
+      }
+      return durPerImage;
+    });
+    const starts = [0];
+    for (let i = 0; i < n; i++) starts.push(starts[i] + itemDurations[i]);
+    const totalDuration = starts[n];
+    function transDurFor(k){ return transType === 'none' ? 0 : Math.min(0.8, itemDurations[k] * 0.3); }
+    function entranceDurFor(k){ return Math.min(1.1, itemDurations[k] * 0.32); }
+    function segmentIndexForTime(t){
+      for (let i = 0; i < n; i++) { if (t < starts[i+1] || i === n-1) return i; }
+      return n - 1;
+    }
 
     btnRender.disabled = true;
     btnRender.textContent = 'Merender...';
@@ -1495,8 +1525,9 @@
       const cType = assignedCam[k];
       const eType = assignedEntrance[k];
       const barSeeds = assignedBarSeeds[k];
-      const camSpan = Math.max(0.001, durPerImage - entranceDur);
-      const camP = Math.max(0, Math.min(1, (lt - entranceDur) / camSpan));
+      const entranceDurK = entranceDurFor(k);
+      const camSpan = Math.max(0.001, itemDurations[k] - entranceDurK);
+      const camP = Math.max(0, Math.min(1, (lt - entranceDurK) / camSpan));
       let { baseW, baseH } = computeBaseGeom(getItemDims(imgObj), W, H, fitMode);
       baseW *= (imgObj.userScale||1); baseH *= (imgObj.userScale||1);
       const camT = getCameraTransform(cType, camP);
@@ -1507,8 +1538,8 @@
       const drawable = getDrawable(imgObj, lt);
 
       const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
-      if (lt < entranceDur && !isJustAppear) {
-        const ep = lt / entranceDur;
+      if (lt < entranceDurK && !isJustAppear) {
+        const ep = lt / entranceDurK;
         if (eType.length === 1) {
           drawEntranceImage(drawable, eType[0], ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
         } else {
@@ -1536,9 +1567,10 @@
       const rot = 0;
       const drawable = getDrawable(imgObj, lt);
 
+      const entranceDurK = entranceDurFor(k);
       const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
-      if (lt < entranceDur && !isJustAppear) {
-        const ep = lt / entranceDur;
+      if (lt < entranceDurK && !isJustAppear) {
+        const ep = lt / entranceDurK;
         if (eType.length === 1) {
           drawEntranceImage(drawable, eType[0], ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
         } else {
@@ -1571,10 +1603,9 @@
       ctx.scale(Math.max(0.001, camT.scale), Math.max(0.001, camT.scale));
       ctx.translate(-W/2, -H/2);
 
-      const idxFloat = t / durPerImage;
-      const kMax = Math.min(Math.floor(idxFloat), n - 1);
+      const kMax = segmentIndexForTime(t);
       for (let k = 0; k <= kMax; k++) {
-        const lt = (k === kMax) ? (t - k * durPerImage) : durPerImage;
+        const lt = (k === kMax) ? (t - starts[k]) : itemDurations[k];
         drawFrameModeImage(k, lt);
       }
       ctx.restore();
@@ -1595,15 +1626,16 @@
 
       drawBackground(W, H);
 
-      const idxFloat = t / durPerImage;
-      let k = Math.min(Math.floor(idxFloat), n - 1);
-      let lt = t - k * durPerImage;
+      const k = segmentIndexForTime(t);
+      const lt = t - starts[k];
+      const durK = itemDurations[k];
+      const transDurK = transDurFor(k);
 
-      const inTransitionWindow = transType !== 'none' && k < n - 1 && lt > (durPerImage - transDuration);
+      const inTransitionWindow = transType !== 'none' && k < n - 1 && lt > (durK - transDurK);
 
       if (inTransitionWindow) {
-        const bp = (lt - (durPerImage - transDuration)) / transDuration;
-        const nextLt = bp * transDuration;
+        const bp = (lt - (durK - transDurK)) / transDurK;
+        const nextLt = bp * transDurK;
 
         if (transType === 'fade') {
           drawSegmentFrame(k, lt, 1, 0);
