@@ -1556,16 +1556,64 @@
         const baseURL =
           'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/umd';
 
-        await ffmpeg.load({
-          coreURL: await toBlobURL(
-            `${baseURL}/ffmpeg-core.js`,
-            'text/javascript'
-          ),
-          wasmURL: await toBlobURL(
-            `${baseURL}/ffmpeg-core.wasm`,
-            'application/wasm'
-          )
-        });
+        // GitHub Pages/Browser memblokir worker FFmpeg yang langsung berasal
+        // dari domain CDN. FFmpeg 0.12 juga memakai classWorkerURL untuk
+        // worker utama. Kita buat worker sebagai Blob dari tiga file FFmpeg
+        // dan inline dependency const.js + errors.js agar tidak ada import
+        // silang dari blob worker ke CDN.
+        const ffmpegPkg =
+          'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm';
+
+        const [coreURL, wasmURL, rawWorker, rawConst, rawErrors] =
+          await Promise.all([
+            toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+            toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            fetch(`${ffmpegPkg}/worker.js`).then(r => {
+              if (!r.ok) throw new Error(`worker.js HTTP ${r.status}`);
+              return r.text();
+            }),
+            fetch(`${ffmpegPkg}/const.js`).then(r => {
+              if (!r.ok) throw new Error(`const.js HTTP ${r.status}`);
+              return r.text();
+            }),
+            fetch(`${ffmpegPkg}/errors.js`).then(r => {
+              if (!r.ok) throw new Error(`errors.js HTTP ${r.status}`);
+              return r.text();
+            })
+          ]);
+
+        const inlineConst = rawConst
+          .replace(/^\s*export\s+/gm, '')
+          .replace(/export\s*\{[^}]*\};?/g, '');
+        const inlineErrors = rawErrors
+          .replace(/^\s*export\s+/gm, '')
+          .replace(/export\s*\{[^}]*\};?/g, '');
+
+        const inlineWorker = rawWorker
+          .replace(/import\s*\{[^}]+\}\s*from\s*["']\.\/const\.js["'];?\s*/m, inlineConst + '\n')
+          .replace(/import\s*\{[^}]+\}\s*from\s*["']\.\/errors\.js["'];?\s*/m, inlineErrors + '\n');
+
+        if (/from\s*["']\.\/(?:const|errors)\.js["']/.test(inlineWorker)) {
+          throw new Error('FFmpeg worker dependency gagal disatukan.');
+        }
+
+        const classWorkerURL = URL.createObjectURL(
+          new Blob([inlineWorker], { type: 'text/javascript' })
+        );
+
+        try {
+          await ffmpeg.load({
+            coreURL,
+            wasmURL,
+            classWorkerURL
+          });
+        } catch (e) {
+          URL.revokeObjectURL(classWorkerURL);
+          throw e;
+        }
+
+        // Simpan URL worker selama instance FFmpeg masih hidup.
+        window.__ffmpegClassWorkerURL = classWorkerURL;
 
         window.__ffmpegInst = ffmpeg;
         return ffmpeg;
