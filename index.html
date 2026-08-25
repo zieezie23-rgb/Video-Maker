@@ -182,6 +182,13 @@
   .download-row a:hover{background:#332a1a;}
   @media (max-width: 460px){ .download-row{flex-direction:column;} .download-row a{padding:12px;} }
   .note{font-size:11px; color:var(--text-dim); margin-top:8px; line-height:1.5;}
+  .credit-tag{
+    position:fixed; left:12px; bottom:10px; z-index:9999;
+    background:rgba(20,18,15,.75); border:1px solid var(--line);
+    color:var(--text-dim); font-size:11px; letter-spacing:.05em;
+    padding:5px 10px; border-radius:2px; pointer-events:none;
+    backdrop-filter:blur(2px);
+  }
   .inline-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .adjust-controls-row{ display:grid; grid-template-columns:2fr 1fr; gap:16px; align-items:stretch; margin-top:14px; }
   @media (max-width: 480px){ .adjust-controls-row{grid-template-columns:1fr;} }
@@ -339,23 +346,34 @@
     <!-- LEFT: CONTROLS -->
     <div>
       <div class="panel-group">
-        <div class="panel" data-num="01 — GAMBAR">
-          <h2>Unggah Gambar</h2>
+        <div class="panel" data-num="01 — UNGGAH">
+          <h2>Unggah</h2>
+          <div class="radio-group" id="uploadCatGroup">
+            <label class="radio-opt active"><input type="radio" name="uploadcat" value="image" checked> Gambar</label>
+            <label class="radio-opt"><input type="radio" name="uploadcat" value="video"> Video</label>
+          </div>
           <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+          <input type="file" id="videoFileInput" accept="video/*" multiple style="display:none;">
           <button class="btn-upload" id="btnPickImages">+ Pilih Gambar (bisa lebih dari satu)</button>
+          <button class="btn-upload" id="btnPickVideos" style="display:none;">+ Pilih Video (bisa lebih dari satu)</button>
           <div class="thumbs" id="thumbs"></div>
-          <div class="note">Urutan gambar = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan.</div>
+          <div class="note">Urutan gambar/video = urutan tampil di video. Gunakan tombol ◀ ▶ pada tiap thumbnail untuk mengubah urutan. Berkas video ditandai ikon 🎬 dan diputar tanpa suara di dalam video hasil (pakai panel Audio untuk menambah suara).</div>
         </div>
 
         <div class="panel" data-num="02 — LATAR">
           <h2>Latar Belakang</h2>
           <div class="radio-group" id="bgRadioGroup">
-            <label class="radio-opt active"><input type="radio" name="bgmode" value="solid" checked> Warna Polos</label>
+            <label class="radio-opt"><input type="radio" name="bgmode" value="none" checked> Tidak Ada (Transparan)</label>
+            <label class="radio-opt"><input type="radio" name="bgmode" value="solid"> Warna Polos</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="gradient"> Gradasi</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="image"> Unggah Gambar</label>
           </div>
 
-          <div class="bg-sub show" id="bgSolid">
+          <div class="bg-sub show" id="bgNone">
+            <div class="note">Tidak ada latar yang digambar — area kosong akan transparan di pratinjau. Catatan: saat direkam jadi berkas video, sebagian besar format tidak mendukung transparansi, jadi area kosong bisa tampil hitam.</div>
+          </div>
+
+          <div class="bg-sub" id="bgSolid">
             <div class="field" style="max-width:120px;">
               <label>Warna</label>
               <input type="color" id="solidColor" value="#14120f">
@@ -405,7 +423,7 @@
         <h2>Animasi Kemunculan</h2>
         <p class="sub">Pilih satu atau lebih. Kalau lebih dari satu dicentang, animasinya akan digabung (kombinasi) jadi satu gerakan kemunculan. Kotak kecil di kiri adalah contoh gerakannya.</p>
         <div class="anim-list" id="entranceList">
-          <label class="anim-row"><input type="checkbox" value="fade" checked>
+          <label class="anim-row"><input type="checkbox" value="fade">
             <div class="demo demo-fade"><div class="demo-inner"></div></div>
             <span class="label-txt"><b>Fade</b></span>
           </label>
@@ -500,7 +518,7 @@
             <select id="resSelect">
               <option value="1280x720">1280x720 (Landscape)</option>
               <option value="1920x1080">1920x1080 (Landscape HD)</option>
-              <option value="720x1280">720x1280 (Portrait/Story)</option>
+              <option value="720x1280" selected>720x1280 (Portrait/Story)</option>
               <option value="1080x1080">1080x1080 (Persegi)</option>
             </select>
           </div>
@@ -590,7 +608,7 @@
         </div>
         <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
 
-        <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar Dulu</button>
+        <button class="main-btn" id="btnRender" disabled>Tambahkan Gambar/Video Dulu</button>
 
         <div class="status" id="statusText"></div>
         <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
@@ -612,7 +630,9 @@
   let isRendering = false;
 
   const fileInput = document.getElementById('fileInput');
+  const videoFileInput = document.getElementById('videoFileInput');
   const btnPickImages = document.getElementById('btnPickImages');
+  const btnPickVideos = document.getElementById('btnPickVideos');
   const thumbsEl = document.getElementById('thumbs');
   const btnRender = document.getElementById('btnRender');
   const stagePlaceholder = document.getElementById('stagePlaceholder');
@@ -642,6 +662,17 @@
     }
   });
 
+  // ---------- KATEGORI UNGGAH (GAMBAR / VIDEO) ----------
+  document.querySelectorAll('input[name="uploadcat"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('#uploadCatGroup .radio-opt').forEach(o => o.classList.remove('active'));
+      r.closest('.radio-opt').classList.add('active');
+      const isVideo = r.value === 'video';
+      btnPickImages.style.display = isVideo ? 'none' : '';
+      btnPickVideos.style.display = isVideo ? '' : 'none';
+    });
+  });
+
   // ---------- IMAGE UPLOAD ----------
   btnPickImages.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => {
@@ -651,7 +682,7 @@
       const img = new Image();
       img.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
       img.src = url;
-      state.images.push({img, url, userScale:1, userOffX:0, userOffY:0});
+      state.images.push({type:'image', img, url, userScale:1, userOffX:0, userOffY:0});
     });
     renderThumbs();
     updateRenderButton();
@@ -659,14 +690,55 @@
     fileInput.value = '';
   });
 
+  // ---------- VIDEO UPLOAD ----------
+  btnPickVideos.addEventListener('click', () => videoFileInput.click());
+  videoFileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => {
+      const url = URL.createObjectURL(f);
+      const video = document.createElement('video');
+      video.src = url;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      const item = {type:'video', video, img:null, url:null, userScale:1, userOffX:0, userOffY:0};
+      state.images.push(item);
+      video.addEventListener('loadedmetadata', () => {
+        // Ambil frame pertama sebagai poster/thumbnail lewat canvas offscreen
+        try { video.currentTime = Math.min(0.05, (video.duration||1)/2); } catch(err) {}
+      });
+      video.addEventListener('seeked', function onSeeked(){
+        const off = document.createElement('canvas');
+        off.width = video.videoWidth || 320;
+        off.height = video.videoHeight || 180;
+        const octx = off.getContext('2d');
+        try { octx.drawImage(video, 0, 0, off.width, off.height); } catch(err) {}
+        const posterUrl = off.toDataURL('image/jpeg', 0.85);
+        const poster = new Image();
+        poster.onload = () => { renderThumbs(); updateRenderButton(); renderAdjustThumbs(); updateAdjustPreview(); };
+        poster.src = posterUrl;
+        item.img = poster;
+        item.url = posterUrl;
+        video.removeEventListener('seeked', onSeeked);
+      }, { once: true });
+      video.load();
+    });
+    renderThumbs();
+    updateRenderButton();
+    renderAdjustThumbs();
+    videoFileInput.value = '';
+  });
+
   function renderThumbs(){
     thumbsEl.innerHTML = '';
     state.images.forEach((item, i) => {
       const div = document.createElement('div');
       div.className = 'thumb';
+      const thumbSrc = item.url || '';
       div.innerHTML = `
-        <img src="${item.url}">
+        ${thumbSrc ? `<img src="${thumbSrc}">` : ''}
         <span class="idx">${i+1}</span>
+        ${item.type === 'video' ? '<span class="idx" style="left:auto; right:20px;">🎬</span>' : ''}
         <button class="rm" title="Hapus" data-i="${i}">×</button>
         <div class="mv">
           <button class="mvL" data-i="${i}" title="Pindah kiri">◀</button>
@@ -712,20 +784,22 @@
 
   function updateRenderButton(){
     if (state.images.length > 0) { btnRender.disabled = false; btnRender.textContent = 'Buat Video'; }
-    else { btnRender.disabled = true; btnRender.textContent = 'Tambahkan Gambar Dulu'; }
+    else { btnRender.disabled = true; btnRender.textContent = 'Tambahkan Gambar/Video Dulu'; }
     syncSlidersToSelected();
     updateAdjustPreview();
   }
 
   // ---------- BACKGROUND CONTROLS ----------
   const bgRadios = document.querySelectorAll('input[name="bgmode"]');
+  const bgNone = document.getElementById('bgNone');
   const bgSolid = document.getElementById('bgSolid');
   const bgGradient = document.getElementById('bgGradient');
   const bgImageSec = document.getElementById('bgImage');
   bgRadios.forEach(r => {
     r.addEventListener('change', () => {
-      document.querySelectorAll('.radio-opt').forEach(o => o.classList.remove('active'));
+      document.querySelectorAll('#bgRadioGroup .radio-opt').forEach(o => o.classList.remove('active'));
       r.closest('.radio-opt').classList.add('active');
+      bgNone.classList.toggle('show', r.value === 'none');
       bgSolid.classList.toggle('show', r.value === 'solid');
       bgGradient.classList.toggle('show', r.value === 'gradient');
       bgImageSec.classList.toggle('show', r.value === 'image');
@@ -906,7 +980,7 @@
       div.style.cursor = 'pointer';
       div.style.borderColor = i === selectedImageIndex ? '#e8a33d' : '';
       div.style.borderWidth = i === selectedImageIndex ? '2px' : '1px';
-      div.innerHTML = `<img src="${item.url}"><span class="idx">${i+1}</span>`;
+      div.innerHTML = `${item.url ? `<img src="${item.url}">` : ''}<span class="idx">${i+1}</span>${item.type === 'video' ? '<span class="idx" style="left:auto; right:20px;">🎬</span>' : ''}`;
       div.addEventListener('click', () => {
         selectedImageIndex = i;
         renderAdjustThumbs();
@@ -948,7 +1022,7 @@
     drawBackground(W, H);
 
     const item = state.images[selectedImageIndex];
-    if (!item) return;
+    if (!item || !item.img) return;
     const fitMode = document.getElementById('fitMode').value;
     const { baseW: bw, baseH: bh } = computeBaseGeom(item.img, W, H, fitMode);
     const drawW = bw * (item.userScale||1);
@@ -1021,7 +1095,9 @@
   // ---------- DRAWING HELPERS ----------
   function drawBackground(w, h){
     const mode = getBgMode();
-    if (mode === 'solid') {
+    if (mode === 'none') {
+      ctx.clearRect(0, 0, w, h);
+    } else if (mode === 'solid') {
       ctx.fillStyle = document.getElementById('solidColor').value;
       ctx.fillRect(0, 0, w, h);
     } else if (mode === 'gradient') {
@@ -1353,7 +1429,7 @@
     const fps = 30;
 
     let checkedEntrance = Array.from(document.querySelectorAll('#entranceList input[type=checkbox]:checked')).map(cb => cb.value);
-    if (checkedEntrance.length === 0) checkedEntrance = ['fade'];
+    if (checkedEntrance.length === 0) checkedEntrance = ['appear'];
 
     const camOptions = ['zoomin','zoomout','panleft','panright','panup','pandown','rotate'];
     const n = state.images.length;
@@ -1386,6 +1462,25 @@
     recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
     const finished = new Promise(resolve => { recorder.onstop = () => resolve(); });
 
+    // Dimensi sumber (image atau video) untuk perhitungan geometri, aman meski poster video belum siap.
+    function getItemDims(imgObj){
+      if (imgObj.img) return { width: imgObj.img.width, height: imgObj.img.height };
+      if (imgObj.video && imgObj.video.videoWidth) return { width: imgObj.video.videoWidth, height: imgObj.video.videoHeight };
+      return { width: 1280, height: 720 };
+    }
+    // Elemen yang benar-benar digambar ke canvas: video (frame berjalan, disinkronkan ke waktu segmen)
+    // atau gambar diam. Untuk video, posisi pemutaran diseek langsung ke waktu lokal segmen (lt) agar
+    // hasilnya deterministik dan sinkron dengan garis waktu perekaman.
+    function getDrawable(imgObj, lt){
+      if (imgObj.type === 'video' && imgObj.video) {
+        const v = imgObj.video;
+        const dur = v.duration && isFinite(v.duration) ? v.duration : lt;
+        try { v.currentTime = Math.max(0, Math.min(lt, Math.max(0, dur - 0.02))); } catch(err) {}
+        return v;
+      }
+      return imgObj.img;
+    }
+
     function drawSegmentFrame(k, lt, alphaMultiplier, slideOffsetPx){
       const imgObj = state.images[k];
       const cType = assignedCam[k];
@@ -1393,27 +1488,28 @@
       const barSeeds = assignedBarSeeds[k];
       const camSpan = Math.max(0.001, durPerImage - entranceDur);
       const camP = Math.max(0, Math.min(1, (lt - entranceDur) / camSpan));
-      let { baseW, baseH } = computeBaseGeom(imgObj.img, W, H, fitMode);
+      let { baseW, baseH } = computeBaseGeom(getItemDims(imgObj), W, H, fitMode);
       baseW *= (imgObj.userScale||1); baseH *= (imgObj.userScale||1);
       const camT = getCameraTransform(cType, camP);
       const drawW = baseW * camT.scale, drawH = baseH * camT.scale;
       const cx = W/2 + camT.offX * W + (imgObj.userOffX||0) * W + (slideOffsetPx||0);
       const cy = H/2 + camT.offY * H + (imgObj.userOffY||0) * H;
       const rot = camT.rot;
+      const drawable = getDrawable(imgObj, lt);
 
       const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
       if (lt < entranceDur && !isJustAppear) {
         const ep = lt / entranceDur;
         if (eType.length === 1) {
-          drawEntranceImage(imgObj.img, eType[0], ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+          drawEntranceImage(drawable, eType[0], ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
         } else {
-          drawEntranceImageCombined(imgObj.img, eType, ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
+          drawEntranceImageCombined(drawable, eType, ep, cx, cy, drawW, drawH, rot, barSeeds, alphaMultiplier, W, H);
         }
       } else {
         ctx.save();
         ctx.globalAlpha = alphaMultiplier;
         ctx.translate(cx, cy); ctx.rotate(rot);
-        ctx.drawImage(imgObj.img, -drawW/2, -drawH/2, drawW, drawH);
+        ctx.drawImage(drawable, -drawW/2, -drawH/2, drawW, drawH);
         ctx.restore();
       }
     }
@@ -1424,25 +1520,26 @@
       const imgObj = state.images[k];
       const eType = assignedEntrance[k];
       const barSeeds = assignedBarSeeds[k];
-      let { baseW, baseH } = computeBaseGeom(imgObj.img, W, H, fitMode);
+      let { baseW, baseH } = computeBaseGeom(getItemDims(imgObj), W, H, fitMode);
       baseW *= (imgObj.userScale||1); baseH *= (imgObj.userScale||1);
       const cx = W/2 + (imgObj.userOffX||0) * W;
       const cy = H/2 + (imgObj.userOffY||0) * H;
       const rot = 0;
+      const drawable = getDrawable(imgObj, lt);
 
       const isJustAppear = eType.length === 0 || (eType.length === 1 && eType[0] === 'appear');
       if (lt < entranceDur && !isJustAppear) {
         const ep = lt / entranceDur;
         if (eType.length === 1) {
-          drawEntranceImage(imgObj.img, eType[0], ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
+          drawEntranceImage(drawable, eType[0], ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
         } else {
-          drawEntranceImageCombined(imgObj.img, eType, ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
+          drawEntranceImageCombined(drawable, eType, ep, cx, cy, baseW, baseH, rot, barSeeds, 1, W, H);
         }
       } else {
         ctx.save();
         ctx.globalAlpha = 1;
         ctx.translate(cx, cy); ctx.rotate(rot);
-        ctx.drawImage(imgObj.img, -baseW/2, -baseH/2, baseW, baseH);
+        ctx.drawImage(drawable, -baseW/2, -baseH/2, baseW, baseH);
         ctx.restore();
       }
     }
@@ -1556,5 +1653,6 @@
 
 })();
 </script>
+<div class="credit-tag">Created by: Zie</div>
 </body>
 </html>
