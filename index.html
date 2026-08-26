@@ -2509,5 +2509,139 @@ html.pixzie-ready body{visibility:visible}
 }
 </style>
 
+
+<style id="pixzie-download-popup-style">
+#pixzieDownloadPopup{
+  position:fixed;
+  left:50%;
+  bottom:94px;
+  z-index:10050;
+  transform:translate(-50%,18px);
+  opacity:0;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:260px;
+  max-width:calc(100vw - 28px);
+  padding:12px 16px;
+  border-radius:14px;
+  background:rgba(11,14,29,.96);
+  border:1px solid rgba(125,145,255,.30);
+  box-shadow:0 16px 42px rgba(0,0,0,.42),0 0 26px rgba(76,72,255,.12);
+  color:#fff;
+  transition:opacity .22s ease,transform .22s ease;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+#pixzieDownloadPopup.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+#pixzieDownloadPopup .ok{
+  width:27px;height:27px;flex:0 0 27px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:linear-gradient(135deg,#35d49a,#36a8ff);
+  color:#06111a;font-weight:900;
+}
+#pixzieDownloadPopup .msg{
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+}
+@media(max-width:620px){
+  #pixzieDownloadPopup{bottom:86px;min-width:0;width:calc(100vw - 28px);}
+}
+</style>
+<div id="pixzieDownloadPopup" role="status" aria-live="polite">
+  <span class="ok">✓</span>
+  <span class="msg" id="pixzieDownloadPopupText">video.mp4 telah diunduh</span>
+</div>
+
+
+<script id="pixzie-download-confirmation">
+(function(){
+  if(window.__pixzieDownloadConfirmationInstalled) return;
+  window.__pixzieDownloadConfirmationInstalled = true;
+
+  function findDownloadButton(){
+    return document.querySelector(
+      '#btnDownload, .export-dock .download-btn, .export-dock a[download]'
+    );
+  }
+
+  function findFilename(){
+    const selectors = [
+      '#downloadFileName',
+      '.export-dock .file-name',
+      '.export-dock .download-name',
+      '.export-dock [data-filename]'
+    ];
+    for(const selector of selectors){
+      const el=document.querySelector(selector);
+      if(el){
+        const value=(el.value || el.textContent || el.dataset.filename || '').trim();
+        if(value) return /\.mp4$/i.test(value) ? value : value+'.mp4';
+      }
+    }
+    const btn=findDownloadButton();
+    if(btn){
+      const value=btn.getAttribute('download') || btn.dataset.filename || '';
+      if(value) return /\.mp4$/i.test(value) ? value : value+'.mp4';
+    }
+    return 'video.mp4';
+  }
+
+  function hideDownloadResult(){
+    // Hide the whole result row if the app has one.
+    const rowSelectors=[
+      '.export-dock .export-result',
+      '.export-dock .download-result',
+      '#exportResult'
+    ];
+    rowSelectors.forEach(s=>{
+      document.querySelectorAll(s).forEach(el=>el.style.display='none');
+    });
+
+    // Also explicitly hide filename and download button.
+    [
+      '#downloadFileName',
+      '.export-dock .file-name',
+      '.export-dock .download-name',
+      '#btnDownload',
+      '.export-dock .download-btn'
+    ].forEach(s=>{
+      document.querySelectorAll(s).forEach(el=>el.style.display='none');
+    });
+  }
+
+  function showPopup(){
+    const popup=document.getElementById('pixzieDownloadPopup');
+    const text=document.getElementById('pixzieDownloadPopupText');
+    if(!popup) return;
+    const filename=findFilename();
+    if(text) text.textContent=filename+' telah diunduh';
+    popup.classList.add('show');
+    clearTimeout(window.__pixzieDownloadPopupTimer);
+    window.__pixzieDownloadPopupTimer=setTimeout(function(){
+      popup.classList.remove('show');
+    },3200);
+  }
+
+  // Capture phase guarantees we see the click even when the app uses its own handler.
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('#btnDownload, .export-dock .download-btn, .export-dock a[download]');
+    if(!btn) return;
+
+    // Let the existing handler perform the actual download first.
+    setTimeout(function(){
+      hideDownloadResult();
+      showPopup();
+    },180);
+  },true);
+})();
+</script>
+
 </body>
 </html>
