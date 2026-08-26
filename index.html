@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MP4 Converter</title>
+<title>PIXZIE — Creative Video Studio</title>
 <style>
   :root{
     --bg: #14120f;
@@ -394,14 +394,104 @@
   .btn-secondary:hover{background:rgba(255,255,255,.08)}
   .project-status{font-size:11px;color:var(--text-dim)}
 
+
+  /* ================= PIXZIE BRAND SYSTEM ================= */
+  :root{
+    --bg:#070A18;
+    --panel:#0D1126;
+    --panel-2:#111735;
+    --line:#252B4D;
+    --amber:#7B3DFF;
+    --amber-dim:#4C63FF;
+    --text:#F5F7FF;
+    --text-dim:#9AA4C5;
+    --danger:#FF4D7D;
+    --pix-blue:#00B4FF;
+    --pix-purple:#7B3DFF;
+    --pix-pink:#FF3D9A;
+    --pix-orange:#FFB020;
+    --pix-yellow:#FFD94A;
+    --brand-gradient:linear-gradient(110deg,#00B4FF 0%,#7B3DFF 30%,#FF3D9A 57%,#FFB020 82%,#FFD94A 100%);
+    --brand-gradient-reverse:linear-gradient(110deg,#FFD94A 0%,#FFB020 20%,#FF3D9A 50%,#7B3DFF 74%,#00B4FF 100%);
+    --brand-glow:0 0 28px rgba(123,61,255,.20),0 0 60px rgba(0,180,255,.08);
+  }
+  body{
+    background:
+      radial-gradient(900px 520px at 12% -8%, rgba(0,180,255,.16), transparent 62%),
+      radial-gradient(900px 560px at 92% 8%, rgba(123,61,255,.18), transparent 60%),
+      radial-gradient(700px 500px at 50% 100%, rgba(255,61,154,.08), transparent 65%),
+      var(--bg);
+    font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif;
+    letter-spacing:0;
+  }
+  .wrap{padding-top:34px;}
+  header{margin-bottom:28px; position:relative;}
+  .brand-lockup{width:76px; height:76px; margin-bottom:8px; filter:drop-shadow(0 10px 28px rgba(61,75,255,.20));}
+  .brand-lockup img{display:block; width:100%; height:100%; object-fit:contain;}
+  header h1{font-family:'Inter','Segoe UI',sans-serif; font-weight:800; font-size:36px; line-height:1; letter-spacing:.06em; margin:2px 0 8px; background:var(--brand-gradient); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 0 24px rgba(123,61,255,.14);}
+  .eyebrow{color:#B8C5FF; font-family:'Inter','Segoe UI',sans-serif; font-size:10px; font-weight:700; letter-spacing:.20em; margin-bottom:9px;}
+  .hero-desc{color:var(--text-dim); max-width:680px; margin:0; font-size:13px; line-height:1.65;}
+  .panel{background:linear-gradient(145deg,rgba(15,20,45,.96),rgba(9,12,29,.96)); border:1px solid rgba(123,61,255,.20); border-radius:14px; box-shadow:0 10px 34px rgba(0,0,0,.22); backdrop-filter:blur(10px);}
+  .panel:hover{border-color:rgba(123,61,255,.32);}
+  .panel::before{background:var(--bg); color:#8498FF; border-radius:20px; font-family:'Inter','Segoe UI',sans-serif; font-weight:700;}
+  .panel h2{font-family:'Inter','Segoe UI',sans-serif; font-weight:750; font-size:15px; letter-spacing:.01em; color:#F7F8FF;}
+  .panel h2::after{content:''; display:block; width:42px; height:2px; margin-top:8px; border-radius:2px; background:var(--brand-gradient); box-shadow:0 0 10px rgba(123,61,255,.28);}
+  .panel .sub,.field label,.note,.project-status,.stage-placeholder{color:var(--text-dim);}
+  select,input[type="number"],input[type="text"],textarea{background:#0A0F25!important; border:1px solid #252C52!important; color:var(--text)!important; border-radius:9px!important;}
+  select:focus,input:focus,button:focus{outline:2px solid rgba(0,180,255,.38); outline-offset:1px;}
+  .radio-opt{color:#8F99BA;}
+  .radio-opt.active{color:#F4F6FF;}
+  .radio-opt input{accent-color:var(--pix-pink);}
+  .btn-upload{background:linear-gradient(145deg,#111735,#0A0F25); border:1px dashed #34406D; color:#B6C0DE; border-radius:10px; text-transform:none; letter-spacing:.01em; transition:.2s ease;}
+  .btn-upload:hover{border-color:#7B3DFF; color:#FFF; box-shadow:0 0 18px rgba(123,61,255,.14);}
+  .btn-secondary{border:1px solid #313B6B; background:rgba(255,255,255,.035); color:#DCE2FF; border-radius:9px;}
+  .btn-secondary:hover{border-color:#7B3DFF; background:rgba(123,61,255,.08);}
+  .main-btn{background:var(--brand-gradient); color:#07101F; border:none; border-radius:12px; font-family:'Inter','Segoe UI',sans-serif; font-weight:800; box-shadow:0 0 22px rgba(123,61,255,.18);}
+  .main-btn:not(:disabled):hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .main-btn:disabled{background:#202744;color:#707B9D; box-shadow:none;}
+  .render-actions{background:rgba(5,8,20,.93); border-top:1px solid rgba(123,61,255,.20); box-shadow:0 -10px 30px rgba(0,0,0,.35); backdrop-filter:blur(14px);}
+  .stage{background:#050817; border:1px solid #29325A; border-radius:12px; box-shadow:inset 0 0 40px rgba(0,0,0,.28);}
+  .progress-track{background:#111735;border-color:#252C52;border-radius:10px;overflow:hidden;}
+  .progress-fill{background:var(--brand-gradient);}
+  .download-box{border-top-color:#252C52;}
+  .download-row a{background:#0C1230;border-color:#6A4BFF;color:#DDE4FF;border-radius:9px;}
+  .download-row a:hover{background:#141D46;}
+  .info-btn{background:#0C1230;border:1px solid #252F58;color:#98A5C8;border-radius:9px;}
+  .info-btn:hover{border-color:#7B3DFF;color:#FFF;box-shadow:0 0 14px rgba(123,61,255,.12);}
+  .help-card{background:linear-gradient(145deg,#0F1530,#090D21);border:1px solid #303A69;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.55);}
+  .help-card h2{font-family:'Inter','Segoe UI',sans-serif;color:#F7F8FF;}
+  .help-close{border-color:#303A69;color:#9AA4C5;border-radius:8px;}
+  .help-close:hover{color:#FFF;border-color:#7B3DFF;}
+  .adjust-size-field,.adjust-pos-field{background:#0B1027;border-color:#252C52;border-radius:12px;}
+  .size-step-btn,.dir-btn{background:#101735;border-color:#2B3561;color:#70CFFF;border-radius:8px;}
+  .size-step-btn:hover,.dir-btn:hover{border-color:#7B3DFF;background:#151D43;}
+  .adjust-size-field input[type="range"]{background:#252E56;}
+  .adjust-size-field input[type="range"]::-webkit-slider-thumb{background:var(--brand-gradient);border:2px solid #080C1C;box-shadow:0 0 12px rgba(123,61,255,.30);}
+  .adjust-size-field input[type="range"]::-moz-range-thumb{background:var(--brand-gradient);border:2px solid #080C1C;box-shadow:0 0 12px rgba(123,61,255,.30);}
+  .anim-list{border-color:#29325A;border-radius:10px;overflow:hidden;}
+  .anim-row,.anim-row:nth-child(6n+4),.anim-row:nth-child(6n+5),.anim-row:nth-child(6n){background:#0D132B;}
+  .anim-row:hover{background:#111A39;}
+  .anim-row input[type=checkbox]{accent-color:var(--pix-pink);}
+  .anim-row .label-txt b{color:#C8D0FF;}
+  .demo{background:#070B1B;border-color:#28325C;border-radius:7px;}
+  .demo-inner,.demo-randombars .bar,.demo-split::before,.demo-split::after{background:var(--brand-gradient);}
+  .credit-tag{color:#69769C;}
+  @media (max-width:520px){
+    .brand-lockup{width:62px; height:62px;}
+    header h1{font-size:30px;}
+    .hero-desc{font-size:12px;}
+  }
+
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <p class="eyebrow">Studio Video — Alat Lokal di Browser</p>
-    <h1>MP4 Converter</h1>
+    <p class="eyebrow">PIXZIE — CREATIVE VIDEO STUDIO</p>
+    <div class="brand-lockup"><img src="assets/pixzie-icon.png" alt="PIXZIE icon"></div>
+    <h1>PIXZIE</h1>
+    <p class="hero-desc">Ubah foto dan video menjadi cerita yang hidup — cepat, kreatif, dan langsung di browser.</p>
     <div class="project-bar">
       <button class="btn-secondary" id="btnSaveProject" type="button">💾 Simpan Project</button>
       <button class="btn-secondary" id="btnLoadProject" type="button">📂 Buka Project</button>
@@ -414,8 +504,8 @@
     <!-- LEFT: CONTROLS -->
     <div>
       <div class="panel-group">
-        <div class="panel" data-num="01 — UNGGAH">
-          <h2>Unggah</h2>
+        <div class="panel" data-num="01 — MEDIA">
+          <h2>Media</h2>
           <div class="field" style="margin-bottom:14px;">
             <div class="radio-group" id="modeRadioGroup" style="margin-bottom:6px;">
               <label class="radio-opt active"><input type="radio" name="videomode" value="gabung" checked> Gabung</label>
@@ -427,8 +517,8 @@
           <div class="thumbs" id="thumbs"></div>
         </div>
 
-        <div class="panel" data-num="02 — LATAR">
-          <h2>Latar Belakang</h2>
+        <div class="panel" data-num="02 — BACKGROUND">
+          <h2>Background</h2>
           <div class="radio-group" id="bgRadioGroup">
             <label class="radio-opt"><input type="radio" name="bgmode" value="none" checked> Tidak Ada</label>
             <label class="radio-opt"><input type="radio" name="bgmode" value="solid"> Warna Polos</label>
@@ -485,8 +575,8 @@
         </div>
       </div>
 
-      <div class="panel" data-num="03 — ANIMASI KEMUNCULAN">
-        <h2>Animasi Kemunculan</h2>
+      <div class="panel" data-num="03 — ENTRANCE">
+        <h2>Entrance Motion</h2>
         <div class="anim-list" id="entranceList">
           <label class="anim-row"><input type="checkbox" value="fade">
             <div class="demo demo-fade"><div class="demo-inner"></div></div>
@@ -540,8 +630,8 @@
       </div>
 
       <div class="panel-group">
-        <div class="panel" data-num="04 — KAMERA &amp; TRANSISI">
-          <h2>Gerakan Kamera &amp; Transisi</h2>
+        <div class="panel" data-num="04 — MOTION">
+          <h2>Camera &amp; Transitions</h2>
           <div class="field">
             <label>Gerakan Kamera</label>
             <select id="animType">
@@ -585,7 +675,7 @@
         </div>
 
         <div class="panel" data-num="05 — AUDIO">
-          <h2>Audio</h2>
+          <h2>Sound &amp; Voice</h2>
           <div class="radio-group" id="audioRadioGroup">
             <label class="radio-opt active"><input type="radio" name="audiomode" value="none" checked> Tanpa Audio</label>
             <label class="radio-opt"><input type="radio" name="audiomode" value="original"> Ikuti Audio Asli Video</label>
@@ -633,8 +723,8 @@
 
     <!-- RIGHT: PREVIEW -->
     <div>
-      <div class="panel" data-num="PRATINJAU">
-        <h2>Pratinjau</h2>
+      <div class="panel" data-num="PREVIEW">
+        <h2>Preview</h2>
 
         <div class="adjust-filelist" id="adjustThumbs"></div>
 
@@ -671,9 +761,9 @@
         <button class="btn-upload" id="btnResetAdjust" style="border-style:solid; margin-bottom:14px;">↺ Kembalikan ke Semula</button>
         <div class="info-bar">
           <button class="info-btn" id="guideBtn">Panduan</button>
-          <span class="info-btn" aria-label="Versi aplikasi">Versi 1.0.0</span>
-          <a class="info-btn" href="https://wa.me/6282113327262?text=Halo%20Zie%2C%20saya%20butuh%20bantuan%20tentang%20MP4%20Converter." target="_blank" rel="noopener">WhatsApp</a>
-          <a class="info-btn" href="mailto:zichookymirnanda@gmail.com?subject=Bantuan%20MP4%20Converter">Email</a>
+          <span class="info-btn" aria-label="Versi aplikasi">PIXZIE 1.0.0</span>
+          <a class="info-btn" href="https://wa.me/6282113327262?text=Halo%20Zie%2C%20saya%20butuh%20bantuan%20tentang%20PIXZIE." target="_blank" rel="noopener">WhatsApp</a>
+          <a class="info-btn" href="mailto:zichookymirnanda@gmail.com?subject=Bantuan%20PIXZIE">Email</a>
         </div>
 
       </div>
@@ -687,8 +777,8 @@
   <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
   <div class="download-box" id="downloadBox">
     <div class="download-row">
-      <input type="text" id="fileNameInput" placeholder="nama-file">
-      <a id="downloadLink" download="video-gambar.mp4">⬇ Unduh</a>
+      <input type="text" id="fileNameInput" placeholder="nama-file-pixzie">
+      <a id="downloadLink" download="pixzie-video.mp4">⬇ Unduh</a>
     </div>
     <div class="note format-note" id="formatNote"></div>
   </div>
@@ -697,14 +787,14 @@
 <div class="help-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="help-card">
     <button class="help-close" id="helpClose" type="button">Tutup</button>
-    <h2 id="helpTitle">Panduan Singkat</h2>
+    <h2 id="helpTitle">Panduan PIXZIE</h2>
     <ol>
       <li>Unggah satu atau beberapa gambar/video.</li>
       <li>Pilih latar, animasi, gerakan kamera, dan audio bila diperlukan.</li>
       <li>Atur ukuran serta posisi file pada area Pratinjau.</li>
       <li>Tekan <b>Buat Video</b>, lalu isi nama file dan tekan <b>Unduh</b>.</li>
     </ol>
-    <p>Versi saat ini: 1.0.0. Untuk bantuan, hubungi Zie melalui WhatsApp atau email.</p>
+    <p>PIXZIE 1.0.0 — creative video studio yang berjalan langsung di browser. Untuk bantuan, hubungi Zie melalui WhatsApp atau email.</p>
   </div>
 </div>
 
@@ -762,7 +852,7 @@
   }
   function buildFileName(ext){
     const raw = sanitizeFileName(fileNameInput.value || '');
-    const base = raw.length > 0 ? raw : 'video-gambar';
+    const base = raw.length > 0 ? raw : 'pixzie-video';
     return `${base}.${ext}`;
   }
   fileNameInput.addEventListener('input', () => {
