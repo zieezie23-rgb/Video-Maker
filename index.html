@@ -482,6 +482,11 @@
     .hero-desc{font-size:12px;}
   }
 
+
+  .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
+  .brand-logo-full{width:min(430px,88vw);height:auto;margin:0 0 18px;filter:drop-shadow(0 16px 38px rgba(65,72,255,.20));}
+  .brand-logo-full img{display:block;width:100%;height:auto;object-fit:contain;}
+  @media (max-width:520px){.brand-logo-full{width:min(330px,86vw);margin-bottom:14px;}}
 </style>
 </head>
 <body>
@@ -489,8 +494,8 @@
 
   <header>
     <p class="eyebrow">PIXZIE — CREATIVE VIDEO STUDIO</p>
-    <div class="brand-lockup"><img src="assets/pixzie-icon.png" alt="PIXZIE icon"></div>
-    <h1>PIXZIE</h1>
+    <div class="brand-lockup brand-logo-full"><img src="assets/pixzie-logo.png" alt="PIXZIE — Make It Move"></div>
+    <h1 class="sr-only">PIXZIE</h1>
     <p class="hero-desc">Ubah foto dan video menjadi cerita yang hidup — cepat, kreatif, dan langsung di browser.</p>
     <div class="project-bar">
       <button class="btn-secondary" id="btnSaveProject" type="button">💾 Simpan Project</button>
