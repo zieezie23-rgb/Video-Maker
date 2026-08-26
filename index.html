@@ -482,26 +482,80 @@
     .hero-desc{font-size:12px;}
   }
 
+  /* ================= PROJECT TOOLBAR — COMPACT ================= */
+  .project-bar{
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+    margin:0; padding:6px;
+    background:rgba(10,14,34,.72);
+    border:1px solid rgba(82,99,170,.28);
+    border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.16);
+    backdrop-filter:blur(12px);
+  }
+  .project-label{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:0 7px 0 5px;
+    color:#7F8CB5;font-size:10px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .project-bar .btn-secondary{
+    min-height:30px;
+    padding:6px 10px;
+    border-radius:8px;
+    border:1px solid rgba(92,108,178,.38);
+    background:rgba(255,255,255,.035);
+    color:#DCE3FF;
+    font-family:'Inter','Segoe UI',sans-serif;
+    font-size:11px;
+    font-weight:650;
+    line-height:1;
+  }
+  .project-bar .btn-secondary:hover{
+    border-color:rgba(123,61,255,.75);
+    background:rgba(123,61,255,.10);
+    box-shadow:0 0 14px rgba(123,61,255,.10);
+  }
+  .project-status{font-size:10px!important;color:#7F8CB5!important;margin-left:2px;}
+  .header-main{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;}
+  .header-copy{min-width:0;}
+  .header-project{flex:0 0 auto;margin-top:2px;}
+  @media (max-width:760px){
+    .header-main{display:block;}
+    .header-project{margin-top:14px;}
+    .project-bar{width:max-content;max-width:100%;}
+  }
+  @media (max-width:520px){
+    .project-label{display:none;}
+    .project-bar .btn-secondary{padding:7px 9px;font-size:10px;}
+  }
 
   .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
-  .brand-logo-full{width:220px;height:auto;margin:0 0 10px;filter:drop-shadow(0 10px 24px rgba(65,72,255,.16));}
+  .brand-logo-full{width:200px;height:auto;margin:0 0 10px;filter:drop-shadow(0 10px 24px rgba(65,72,255,.16));}
   .brand-logo-full img{display:block;width:100%;height:auto;object-fit:contain;}
-  @media (max-width:520px){.brand-logo-full{width:175px;margin-bottom:8px;}}
+  @media (max-width:520px){.brand-logo-full{width:160px;margin-bottom:8px;}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <p class="eyebrow">PIXZIE — CREATIVE VIDEO STUDIO</p>
-    <div class="brand-lockup brand-logo-full"><img src="assets/pixzie-logo.png" alt="PIXZIE — Make It Move"></div>
-    <h1 class="sr-only">PIXZIE</h1>
-    <p class="hero-desc">Ubah foto dan video menjadi cerita yang hidup — cepat, kreatif, dan langsung di browser.</p>
-    <div class="project-bar">
-      <button class="btn-secondary" id="btnSaveProject" type="button">💾 Simpan Project</button>
-      <button class="btn-secondary" id="btnLoadProject" type="button">📂 Buka Project</button>
-      <input id="projectFileInput" type="file" accept="application/json,.json" hidden>
-      <span id="projectStatus" class="project-status"></span>
+    <div class="header-main">
+      <div class="header-copy">
+        <p class="eyebrow">PIXZIE — CREATIVE VIDEO STUDIO</p>
+        <div class="brand-lockup brand-logo-full"><img src="assets/pixzie-logo.png" alt="PIXZIE — Make It Move"></div>
+        <h1 class="sr-only">PIXZIE</h1>
+        <p class="hero-desc">Ubah foto dan video menjadi cerita yang hidup — cepat, kreatif, dan langsung di browser.</p>
+      </div>
+      <div class="header-project">
+        <div class="project-bar" aria-label="Project">
+          <span class="project-label">Project</span>
+          <button class="btn-secondary" id="btnSaveProject" type="button">💾 Simpan</button>
+          <button class="btn-secondary" id="btnLoadProject" type="button">📂 Buka</button>
+          <input id="projectFileInput" type="file" accept="application/json,.json" hidden>
+          <span id="projectStatus" class="project-status"></span>
+        </div>
+      </div>
     </div>
   </header>
 
