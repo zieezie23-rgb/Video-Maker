@@ -570,6 +570,120 @@ header img{
   image-rendering:auto;
 }
 
+
+/* ===== PIXZIE FINAL UI PRESERVED ===== */
+
+/* Project: fixed upper-right, vertically aligned with the logo/header */
+header .header-project{
+  position:absolute !important;
+  top:50% !important;
+  right:18px !important;
+  left:auto !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
+  z-index:10001 !important;
+  margin:0 !important;
+}
+header .project-bar{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  min-height:38px !important;
+  padding:5px 7px !important;
+  border-radius:12px !important;
+}
+header .project-label{
+  height:28px !important;
+  padding:0 5px !important;
+  font-size:9px !important;
+}
+header .project-bar .btn-secondary{
+  height:28px !important;
+  min-height:28px !important;
+  padding:0 9px !important;
+  border-radius:8px !important;
+  font-size:10px !important;
+  white-space:nowrap !important;
+}
+header .project-status{
+  max-width:110px !important;
+  font-size:9px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Created by: Zie remains floating in the lower-left */
+.credit-tag{
+  position:fixed !important;
+  left:12px !important;
+  bottom:10px !important;
+  right:auto !important;
+  top:auto !important;
+  z-index:10002 !important;
+  margin:0 !important;
+  pointer-events:none !important;
+}
+
+/* Export dock remains floating and centered at the bottom */
+.export-dock{
+  position:fixed !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:14px !important;
+  transform:translateX(-50%) !important;
+  z-index:10001 !important;
+}
+
+/* Make filename + download visually clear */
+.export-dock .file-name,
+.export-dock .download-name,
+#downloadFileName{
+  min-width:150px !important;
+  max-width:240px !important;
+  padding:10px 12px !important;
+  border:1px solid rgba(255,255,255,.18) !important;
+  background:rgba(255,255,255,.075) !important;
+  color:#fff !important;
+  border-radius:10px !important;
+  font-weight:700 !important;
+  font-size:12px !important;
+}
+.export-dock .download-btn,
+#btnDownload{
+  min-height:40px !important;
+  padding:0 17px !important;
+  border-radius:11px !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+}
+
+/* Mobile: keep the same hierarchy without covering the editor */
+@media(max-width:620px){
+  header .header-project{
+    top:50% !important;
+    right:9px !important;
+    transform:translateY(-50%) !important;
+  }
+  header .project-label{display:none !important}
+  header .project-bar{padding:4px !important;gap:4px !important}
+  header .project-bar .btn-secondary{
+    height:27px !important;
+    min-height:27px !important;
+    padding:0 7px !important;
+    font-size:9px !important;
+  }
+  .export-dock{
+    left:50% !important;
+    bottom:10px !important;
+    max-width:calc(100vw - 20px) !important;
+  }
+  .credit-tag{
+    left:8px !important;
+    bottom:7px !important;
+  }
+}
+
 </style>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -2365,5 +2479,35 @@ html.pixzie-ready body{visibility:visible}
 })();
 </script>
 <div class="credit-tag">Created by: Zie</div>
+
+<div id="downloadSuccessPopup" class="download-success-popup" aria-live="polite" role="status">
+  <div class="download-success-icon">✓</div>
+  <strong id="downloadSuccessText">video.mp4 telah diunduh</strong>
+</div>
+<style>
+.download-success-popup{
+  position:fixed;left:50%;bottom:92px;z-index:10020;
+  transform:translate(-50%,18px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:10px;
+  padding:11px 15px;border-radius:13px;
+  background:rgba(12,15,30,.94);
+  border:1px solid rgba(125,145,255,.28);
+  box-shadow:0 14px 38px rgba(0,0,0,.38);
+  color:#fff;transition:.22s ease;
+}
+.download-success-popup.show{
+  opacity:1;transform:translate(-50%,0);
+}
+.download-success-icon{
+  width:25px;height:25px;border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#35d49a,#36a8ff);
+  color:#06111a;font-weight:900;
+}
+@media(max-width:620px){
+  .download-success-popup{bottom:84px;max-width:calc(100vw - 28px);}
+}
+</style>
+
 </body>
 </html>
