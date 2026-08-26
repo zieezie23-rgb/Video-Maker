@@ -669,6 +669,91 @@
   z-index: 90 !important;
 }
 
+
+/* === PIXZIE: PROJECT UTILITY — TOP RIGHT === */
+header .header-project {
+  position: fixed !important;
+  top: 14px !important;
+  right: 14px !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: 10001 !important;
+  margin: 0 !important;
+  width: auto !important;
+  pointer-events: none;
+}
+header .project-bar {
+  pointer-events: auto;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 6px !important;
+  margin: 0 !important;
+  border-radius: 14px !important;
+  background: rgba(10,13,29,.86) !important;
+  border: 1px solid rgba(126,143,215,.25) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35), 0 0 22px rgba(78,71,255,.08) !important;
+  backdrop-filter: blur(16px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(135%) !important;
+}
+header .project-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 30px !important;
+  padding: 0 7px !important;
+  color: var(--text-dim) !important;
+  font-size: 10px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+header .project-bar .btn-secondary {
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 10px !important;
+  border-radius: 9px !important;
+  font-size: 11px !important;
+  white-space: nowrap !important;
+}
+header .project-status {
+  max-width: 130px !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+@media (max-width: 620px) {
+  header .header-project {
+    top: 9px !important;
+    right: 9px !important;
+  }
+  header .project-label { display: none !important; }
+  header .project-bar { padding: 5px !important; }
+  header .project-bar .btn-secondary {
+    height: 29px !important;
+    min-height: 29px !important;
+    padding: 0 8px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* === CREATED BY: ZIE — KEEP FLOATING === */
+.credit-tag {
+  position: fixed !important;
+  left: 12px !important;
+  bottom: 10px !important;
+  right: auto !important;
+  top: auto !important;
+  z-index: 10000 !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  opacity: .78 !important;
+  color: var(--text-dim) !important;
+  font-size: 10px !important;
+  letter-spacing: .06em !important;
+}
+
 </style>
 </head>
 <body>
