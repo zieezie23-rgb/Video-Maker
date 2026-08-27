@@ -7,12 +7,12 @@
   "theme_color": "#14120f",
   "icons": [
     {
-      "src": "assets/pixzie-logo.png",
+      "src": "assets/pixzie_logo_2.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/pixzie-logo.png",
+      "src": "assets/pixzie_logo_2.png",
       "sizes": "512x512",
       "type": "image/png"
     }
